@@ -2268,7 +2268,6 @@ contains
       enddo
       this%betr_pft(c)%npfts = pp
       this%betr_pft(c)%crop(0:betr_maxpft)=crop(0:betr_maxpft)
-      print*,'crop',size(crop),betr_maxpatch_pft,col%npfts(c), this%betr_pft(c)%npfts
     endif
   enddo
 
