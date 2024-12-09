@@ -64,6 +64,7 @@ contains
     use cdomBGCReactionsType  , only : cdom_bgc_reaction_type
     use simicBGCReactionsType , only : simic_bgc_reaction_type
     use kecaBGCReactionsType  , only : keca_bgc_reaction_type
+    use BgcReactionsresomType , only : bgc_reaction_resom_type  !Jing Tao - still used old conventional name, but keep it right now.
 #endif
     use v1ecaBGCReactionsType, only : v1eca_bgc_reaction_type
     !end_appadd
@@ -93,6 +94,8 @@ contains
        asoibgc=.true.;allocate(bgc_reaction, source=simic_bgc_reaction_type())
     case ("keca")
        asoibgc=.true.;allocate(bgc_reaction, source=keca_bgc_reaction_type())
+    case ("resom")
+       asoibgc=.true.;allocate(bgc_reaction, source=bgc_reaction_resom_type())    !Jing Tao - still used old conventional name
 #endif
     case ("v1eca")
        asoibgc=.true.;allocate(bgc_reaction, source=v1eca_bgc_reaction_type())
@@ -123,6 +126,7 @@ contains
   use cdomPlantSoilBGCType  , only : cdom_plant_soilbgc_type
   use simicPlantSoilBGCType , only : simic_plant_soilbgc_type
   use kecaPlantSoilBGCType  , only : keca_plant_soilbgc_type
+  use PlantSoilBgcresomType , only : plant_soilbgc_resom_type  !Jing Tao - still used old conventional name, but keep it right now.
 #endif
   use v1ecaPlantSoilBGCType, only : v1eca_plant_soilbgc_type
   !end_appadd
@@ -150,6 +154,8 @@ contains
      allocate(plant_soilbgc, source=simic_plant_soilbgc_type())
   case ("keca")
      allocate(plant_soilbgc, source=keca_plant_soilbgc_type())
+  case ("resom")
+     allocate(plant_soilbgc, source=plant_soilbgc_resom_type())   !Jing Tao - still used old conventional name
 #endif
   case ("v1eca","v1eca_mosart")
      allocate(plant_soilbgc, source=v1eca_plant_soilbgc_type())
@@ -174,6 +180,7 @@ contains
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
+  use resomParaType    , only : resom_para 
 #endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd
@@ -197,6 +204,8 @@ contains
      call simic_para%readPars(ncid, bstatus)
    case ("keca")
      call keca_para%readPars(ncid, bstatus)
+   case ("resom")
+     call resom_para%readPars(ncid, bstatus)
 #endif
    case ("v1eca","v1eca_mosart")
      call v1eca_para%readPars(ncid, bstatus)
@@ -219,6 +228,7 @@ contains
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
+  use resomParaType    , only : resom_para
 #endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd
@@ -246,6 +256,8 @@ contains
      call simic_para%Init(bstatus)
    case ("keca")
      call keca_para%Init(bstatus)
+   case ("resom")
+     call resom_para%Init(bstatus)    
 #endif
    case ("v1eca")
      call v1eca_para%Init(bstatus)
@@ -265,6 +277,7 @@ contains
   use ch4soilParaType  , only : ch4soil_para
   use cdomParaType    , only : cdom_para
   use kecaParaType    , only : keca_para
+  use resomParaType   , only : resom_para
 #endif
   use v1ecaParaType  , only : v1eca_para
   !end_appadd
@@ -282,6 +295,8 @@ contains
      call cdom_para%set_spinup_factor()
   case ("keca")
      call keca_para%set_spinup_factor()
+  case ("resom")
+     call resom_para%set_spinup_factor()   
 #endif
   case ("v1eca","v1eca_mosart")
      call  v1eca_para%set_spinup_factor()
@@ -304,6 +319,7 @@ contains
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
+  use resomParaType    , only : resom_para
 #endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd

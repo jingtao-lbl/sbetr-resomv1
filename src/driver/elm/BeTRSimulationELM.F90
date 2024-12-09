@@ -1094,7 +1094,7 @@ contains
       p31state_vars%sminp(c) = this%biogeo_state(c)%p31state_vars%sminp_col(c_l)
       p31state_vars%occlp(c) = this%biogeo_state(c)%p31state_vars%occlp_col(c_l)
 
-      if(index(reaction_method,'ecacnp')/=0 .or. index(reaction_method,'ch4soil')/=0)then
+      if(index(reaction_method,'ecacnp')/=0 .or. index(reaction_method,'ch4soil')/=0 .or. index(reaction_method,'resom')/=0)then
         c12state_vars%som1c(c) = this%biogeo_state(c)%c12state_vars%som1c_col(c_l)
         c12state_vars%som2c(c) = this%biogeo_state(c)%c12state_vars%som2c_col(c_l)
         c12state_vars%som3c(c) = this%biogeo_state(c)%c12state_vars%som3c_col(c_l)
@@ -1523,7 +1523,7 @@ contains
   !the following parameters are specific to ECACNP, and I assume they are
   !grid specific as they currently used in elm-cnp.
   if(index(reaction_method,'ecacnp')/=0 .or. index(reaction_method, 'ch4soil')/=0 &
-     .or. index(reaction_method, 'v1eca')/=0)then
+     .or. index(reaction_method, 'v1eca')/=0 .or. index(reaction_method, 'resom')/=0)then
     do j =1, betr_bounds%ubj
       do fc = 1, num_surfc
         c = filter_soilc(fc)
@@ -1544,7 +1544,7 @@ contains
       enddo
     endif
   endif
-  if(index(reaction_method,'v1eca')/=0)then
+  if(index(reaction_method,'v1eca')/=0 .or. index(reaction_method, 'resom')then 
     do j =1, betr_bounds%ubj
       do fc = 1, num_surfc
         c = filter_soilc(fc)

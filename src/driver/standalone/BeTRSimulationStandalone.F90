@@ -642,6 +642,7 @@ contains
     endif
 
     if(index(trim(reaction_method),'ecacnp')/=0 .or. &
+      index(trim(reaction_method),'resom')/=0 .or. &
       index(trim(reaction_method),'cdom')/=0 .or. &
       index(trim(reaction_method),'keca')/=0 .or. &
       index(trim(reaction_method),'ch4soil')/=0)then

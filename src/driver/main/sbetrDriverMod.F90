@@ -638,6 +638,43 @@ end subroutine sbetrBGC_driver
     id = id + 1; ystates(begc:endc,id) = carbonstate_vars%cmass_residual(begc:endc)
     id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%nmass_residual(begc:endc)
     id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%pmass_residual(begc:endc)
+    
+    elseif(index(trim(reaction_method),'resom')/=0)then !Jing Tao - changed index, removed _col
+    id = 0
+    id = id + 1; ystates(begc:endc,id) = carbonflux_vars%hr(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenflux_vars%f_n2o_nit(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenflux_vars%f_denit(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenflux_vars%f_nit(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonflux_vars%co2_soi_flx(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenflux_vars%nh3_soi_flx(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%cwdc(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%totlitc(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%totsomc(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%totlitc_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%totsomc_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%cwdn(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%totlitn(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%totsomn(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%totlitn_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%totsomn_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%cwdp(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%totlitp(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%totsomp(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%totlitp_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%totsomp_1m(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%smin_nh4(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%smin_no3(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%sminp(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%som1c(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%som2c(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = carbonstate_vars%som3c(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%som1n(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%som2n(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%som3n(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%som1p(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%som2p(begc:endc)
+    id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%som3p(begc:endc)
+  
   elseif(index(trim(reaction_method),'cdom')/=0)then
     id = 0
     id = id + 1; ystates(begc:endc,id) = carbonflux_vars%hr(begc:endc)
@@ -676,6 +713,7 @@ end subroutine sbetrBGC_driver
     id = id + 1; ystates(begc:endc,id) = carbonstate_vars%cmass_residual(begc:endc)
     id = id + 1; ystates(begc:endc,id) = nitrogenstate_vars%nmass_residual(begc:endc)
     id = id + 1; ystates(begc:endc,id) = phosphorusstate_vars%pmass_residual(begc:endc)
+    
   elseif(index(trim(reaction_method),'simic')/=0)then
     ystates(:,:) = 0._r8
     id = 0

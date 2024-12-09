@@ -28,6 +28,7 @@ contains
     use ecacnpBGCType, only : create_jarmodel_ecacnp
     use simicBGCType,  only : create_jarmodel_simicbgc
     use cdomBGCType, only : create_jarmodel_cdom
+    use BgcresomType, only : create_jarmodel_resomeca    !Jing Tao - old conventional name
     use v1ecaBGCType, only : create_jarmodel_v1eca
     !end_appadd
     use BeTRJarModel      , only : jar_model_type
@@ -46,6 +47,8 @@ contains
           allocate(jarmodel, source=create_jarmodel_simicbgc())
        case ("cdom")
           allocate(jarmodel, source=create_jarmodel_cdom())
+       case ("resom")
+          allocate(jarmodel, source=create_jarmodel_resomeca())
        case ("v1eca")
           allocate(jarmodel, source=create_jarmodel_v1eca())
     !end_appadd
@@ -69,6 +72,7 @@ contains
     use ecacnpParaType  , only : create_jarpars_ecacnp
     use simicParaType   , only : create_jarpars_simic
     use cdomParaType   , only : create_jarpars_cdom
+    use resomParaType  , only : create_jarpars_resomeca
     use v1ecaParaType  , only : create_jarpars_v1eca
     !end_appadd
     implicit none
@@ -86,6 +90,8 @@ contains
           allocate(jarpars, source=create_jarpars_simic())
        case ("cdom")
           allocate(jarpars, source=create_jarpars_cdom())
+       case ("resom")
+          allocate(jarpars, source=create_jarpars_resomeca()) 
        case ("v1eca")
           allocate(jarpars, source=create_jarpars_v1eca())
     !end_appadd
