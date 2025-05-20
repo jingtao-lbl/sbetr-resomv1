@@ -1544,7 +1544,7 @@ contains
       enddo
     endif
   endif
-  if(index(reaction_method,'v1eca')/=0 .or. index(reaction_method, 'resom')then 
+  if(index(reaction_method,'v1eca')/=0 .or. index(reaction_method, 'resom')) then 
     do j =1, betr_bounds%ubj
       do fc = 1, num_surfc
         c = filter_soilc(fc)
