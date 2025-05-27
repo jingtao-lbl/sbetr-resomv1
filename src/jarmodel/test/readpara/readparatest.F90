@@ -2,7 +2,7 @@ program readparatest
 
 
   use ecacnpParaType, only : create_jarpars_ecacnp, ecacnp_para_type
-  use resomParaType, only : create_jarpars_resomeca, resomPara_type
+  use resomParaType, only : create_jarpars_resomeca, resom_para_type
   use cdomParaType, only : cdomPara_type, create_jarpars_cdom
   use ncdio_pio   , only : file_desc_t, ncd_io
   use BetrStatusType   , only : betr_status_type
@@ -11,7 +11,7 @@ implicit none
 
   class(ecacnp_para_type), pointer :: centpara
   class(cdomPara_type), pointer :: cdompara
-  class(resomPara_type), pointer :: resompara
+  class(resom_para_type), pointer :: resompara
   type(betr_status_type) :: bstatus
   type(file_desc_t)  :: ncid  ! pio netCDF file id
   character(len=*), parameter :: fname1='/Users/jinyuntang/work/github/ACME-Climate/sbetr/tools/jarmodel.ecacnp_pars.03072018.nc'

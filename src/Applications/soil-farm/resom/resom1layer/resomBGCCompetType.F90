@@ -1,4 +1,4 @@
-module BgcresomCompetType
+module resomBGCCompetType
 !
 ! code to do ECA based competition
   ! !USES:
@@ -43,7 +43,7 @@ contains
   !-------------------------------------------------------------------------------
   subroutine Init(this, biogeo_con, bstatus)
   use BiogeoConType               , only : BiogeoCon_type
-  use resomParaType               , only : resomPara_type
+  use resomParaType               , only : resom_para_type
   implicit none
   class(Compet_ECA_type), intent(inout) :: this
   class(BiogeoCon_type)       , intent(in) :: biogeo_con
@@ -55,7 +55,7 @@ contains
 
   call bstatus%reset()
   select type(biogeo_con)
-  type is(resomPara_type)
+  type is(resom_para_type)
     this%kaff_minn_nh4_mic = biogeo_con%km_decomp_nh4
     this%kaff_minn_no3_mic = biogeo_con%km_decomp_no3
     this%kaff_minp_mic     = biogeo_con%km_decomp_p
@@ -256,4 +256,4 @@ contains
   deallocate(se_complex)
   end subroutine run_compet_phosphorus
 
-end module BgcresomCompetType
+end module resomBGCCompetType

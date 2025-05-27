@@ -1,8 +1,8 @@
-module BgcresomMath
+module resomBGCMath
   !DESCRIPTION
 !module defines math functions needed
 use bshr_kind_mod       , only : r8 => shr_kind_r8
-use BgcresomDebType     , only : debs
+use resomBGCDebType     , only : debs
 use betr_ctrl           , only : iulog  => biulog, do_betr_output
 use betr_constants      , only : stdout                                ! added
 implicit none
@@ -42,7 +42,7 @@ contains
     !Dec 14/2012: Jinyun Tang, modified from numerical recipes in F90 by press et al. 1188-1189
     !
     !!USES:
-    use BgcresomDebType    , only : debs
+    use resomBGCDebType    , only : debs
     use betr_constants    , only : betr_errmsg_len
     use BetrstatusType    , only : betr_status_type
     !
@@ -59,7 +59,7 @@ contains
     interface
        subroutine func(x, func_data, f)
          use bshr_kind_mod        , only : r8 => shr_kind_r8
-         use BgcresomDebType      , only : debs
+         use resomBGCDebType      , only : debs
          implicit none
          real(r8), intent(in)  :: x
          !type(debs), intent(in) :: func_data ! data passed to subroutine func
@@ -154,4 +154,4 @@ contains
   end subroutine brent
 
 
-end module BgcresomMath
+end module resomBGCMath

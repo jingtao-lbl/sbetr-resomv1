@@ -1,4 +1,4 @@
-module BgcresomNitDenType
+module resomBGCNitDenType
 ! DESCRIPTION
 ! do nitrification denitrification based on century's methods
 
@@ -42,10 +42,10 @@ implicit none
 
   !-------------------------------------------------------------------------------
   subroutine init(this, biogeo_con)
-  use resomParaType, only : resomPara_type
+  use resomParaType, only : resom_para_type
   implicit none
   class(resom_nitden_type) , intent(inout) :: this
-  type(resomPara_type)       , intent(in) :: biogeo_con
+  type(resom_para_type)       , intent(in) :: biogeo_con
 
   !do memory allocation thing
 
@@ -53,10 +53,10 @@ implicit none
 
   !-------------------------------------------------------------------------------
   subroutine UpdateParas(this, biogeo_con)
-  use resomParaType, only : resomPara_type
+  use resomParaType, only : resom_para_type
   implicit none
   class(resom_nitden_type), intent(inout) :: this
-  type(resomPara_type),intent(in) :: biogeo_con
+  type(resom_para_type),intent(in) :: biogeo_con
 
   this%organic_max  = biogeo_con%organic_max
 
@@ -186,7 +186,7 @@ implicit none
     use betr_varcon        , only : rpi => brpi, secspday => bsecspday
     use MathfuncMod        , only : safe_div
     use bshr_const_mod     , only : SHR_CONST_TKFRZ
-    use BgcresomDecompType     , only : Decompresom_type
+    use resomBGCDecompType     , only : Decompresom_type
     use tracer_varcon      , only : catomw, natomw
     use JarBgcForcType , only : JarBGC_forc_type
     implicit none
@@ -311,7 +311,7 @@ implicit none
 
   use betr_varcon        , only : rpi => brpi, secspday => bsecspday
   use JarBgcForcType , only : JarBGC_forc_type
-  use BgcresomDecompType     , only : Decompresom_type
+  use resomBGCDecompType     , only : Decompresom_type
   implicit none
   class(resom_nitden_type) , intent(inout) :: this
   real(r8)                   , intent(in) :: smin_nh4
@@ -355,29 +355,29 @@ implicit none
   end subroutine calc_pot_nitr
 
   !---------------------------------------------------------------------------------
-  subroutine calc_cascade_matrix(this, resombgc_index, n2_n2o_ratio_denit, cascade_matrix)
+  subroutine calc_cascade_matrix(this, resom_bgc_index, n2_n2o_ratio_denit, cascade_matrix)
 
-  use BgcresomIndexType, only : resombgc_index_type
+  use resomBGCIndexType, only : resom_bgc_index_type
   implicit none
   class(resom_nitden_type)  , intent(inout) :: this
-  type(resombgc_index_type) , intent(in) :: resombgc_index
+  type(resom_bgc_index_type) , intent(in) :: resom_bgc_index
   real(r8)                    , intent(in) :: n2_n2o_ratio_denit
-  real(r8)                    , intent(inout)    :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+  real(r8)                    , intent(inout)    :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
 
   integer :: reac
 
   associate(                                                &
-    primvarid    => resombgc_index%primvarid            , & !
-    lid_nh4   => resombgc_index%lid_nh4                 , & !
-    lid_o2   => resombgc_index%lid_o2                   , & !
-    lid_n2   => resombgc_index%lid_n2                   , & !
-    lid_n2o   => resombgc_index%lid_n2o                 , & !
-    lid_no3   => resombgc_index%lid_no3                 , & !
-    lid_no3_den => resombgc_index%lid_no3_den           , &
-    lid_nh4_nit_reac => resombgc_index%lid_nh4_nit_reac , & !
-    lid_no3_den_reac => resombgc_index%lid_no3_den_reac , & !
-    lid_nh4_nit        => resombgc_index%lid_nh4_nit    , & !
-    lid_n2o_nit=> resombgc_index%lid_n2o_nit              & !
+    primvarid    => resom_bgc_index%primvarid            , & !
+    lid_nh4   => resom_bgc_index%lid_nh4                 , & !
+    lid_o2   => resom_bgc_index%lid_o2                   , & !
+    lid_n2   => resom_bgc_index%lid_n2                   , & !
+    lid_n2o   => resom_bgc_index%lid_n2o                 , & !
+    lid_no3   => resom_bgc_index%lid_no3                 , & !
+    lid_no3_den => resom_bgc_index%lid_no3_den           , &
+    lid_nh4_nit_reac => resom_bgc_index%lid_nh4_nit_reac , & !
+    lid_no3_den_reac => resom_bgc_index%lid_no3_den_reac , & !
+    lid_nh4_nit        => resom_bgc_index%lid_nh4_nit    , & !
+    lid_n2o_nit=> resom_bgc_index%lid_n2o_nit              & !
 
   )
   !---------------------------------------------------------------------------------
@@ -422,17 +422,17 @@ implicit none
 
   end function get_nit_o2_scef
   !---------------------------------------------------------------------------------
-  subroutine run_nitden(this, resombgc_index,bgc_forc, decompkf_eca,&
+  subroutine run_nitden(this, resom_bgc_index,bgc_forc, decompkf_eca,&
     smin_nh4, smin_no3, o2b, o2_decomp_depth, pot_f_nit_mol_per_sec, pot_co2_hr, &
     pot_f_nit, pot_f_denit, cascade_matrix)
   !this returns the vamx for nitrification and denitrification
   !also return is the stoichiometry matrix for nitden processes
-  use BgcresomDecompType      , only : Decompresom_type
+  use resomBGCDecompType      , only : Decompresom_type
   use JarBgcForcType  , only : JarBGC_forc_type
-  use BgcresomIndexType , only : resombgc_index_type
+  use resomBGCIndexType , only : resom_bgc_index_type
   implicit none
   class(resom_nitden_type)  , intent(inout) :: this
-  type(resombgc_index_type) , intent(in) :: resombgc_index
+  type(resom_bgc_index_type) , intent(in) :: resom_bgc_index
   type(JarBGC_forc_type)  , intent(in) :: bgc_forc
   type(Decompresom_type)       , intent(in) :: decompkf_eca
   real(r8)                    , intent(in) :: o2b
@@ -443,7 +443,7 @@ implicit none
   real(r8)                    , intent(in) :: pot_co2_hr  ! potential co2 emission from heterotrophic respiration
   real(r8)                    , intent(out) :: pot_f_nit  ! mol N /s
   real(r8)                    , intent(out) :: pot_f_denit  ! mol N/s
-  real(r8)                    , intent(inout) :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+  real(r8)                    , intent(inout) :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
 
   !local variables
   real(r8) :: n2_n2o_ratio_denit
@@ -458,7 +458,7 @@ implicit none
       n2_n2o_ratio_denit, pot_f_nit, pot_f_denit)
 
   !calcualte cascade matrix for nitrification denitrification
-  call this%calc_cascade_matrix(resombgc_index, n2_n2o_ratio_denit, cascade_matrix)
+  call this%calc_cascade_matrix(resom_bgc_index, n2_n2o_ratio_denit, cascade_matrix)
   end subroutine run_nitden
 
-end module BgcresomNitDenType
+end module resomBGCNitDenType

@@ -1,4 +1,4 @@
-module BgcresomSOMType
+module resomBGCSOMType
 !
 !DESCRIPTION
 !module defines the resom decomposition
@@ -90,20 +90,20 @@ implicit none
   end type resomSom_type
 contains
 
-  subroutine Init(this, resombgc_index, biogeo_con, bstatus)
+  subroutine Init(this, resom_bgc_index, biogeo_con, bstatus)
 
-  use BgcresomIndexType   , only : resombgc_index_type
-  use resomParaType     , only : resomPara_type
+  use resomBGCIndexType   , only : resom_bgc_index_type
+  use resomParaType     , only : resom_para_type
   use BetrStatusType      , only : betr_status_type
   implicit none
   class(resomSom_type)          , intent(inout) :: this
-  type(resombgc_index_type)     , intent(in)    :: resombgc_index
-  type(resomPara_type)        , intent(in)    :: biogeo_con
+  type(resom_bgc_index_type)     , intent(in)    :: resom_bgc_index
+  type(resom_para_type)        , intent(in)    :: biogeo_con
   type(betr_status_type)        , intent(out)   :: bstatus
 
   this%record = 0              !-zlyu
   call bstatus%reset()
-  nresompools = resombgc_index%nom_pools
+  nresompools = resom_bgc_index%nom_pools
 
   call this%InitAllocate()
 
@@ -125,16 +125,16 @@ contains
   allocate(this%def_cc14(nresompools));this%def_cc14(:) = 0._r8
   end subroutine InitAllocate
 !------------------------------------------
-  subroutine UpdateParas(this,resombgc_index,  biogeo_con)
+  subroutine UpdateParas(this,resom_bgc_index,  biogeo_con)
   !
   ! intialize model parameters
-  use resomParaType , only : resomPara_type
-  use BgcresomIndexType , only : resombgc_index_type
+  use resomParaType , only : resom_para_type
+  use resomBGCIndexType , only : resom_bgc_index_type
   use tracer_varcon    , only : catomw, natomw, patomw
   implicit none
   class(resomSom_type)  , intent(inout) :: this
-  type(resombgc_index_type) , intent(in) :: resombgc_index
-  type(resomPara_type) , intent(in)    :: biogeo_con
+  type(resom_bgc_index_type) , intent(in) :: resom_bgc_index
+  type(resom_para_type) , intent(in)    :: biogeo_con
 
   this%yld_res      =biogeo_con%yld_res
   this%fenz2poly    =biogeo_con%fenz2poly
@@ -165,88 +165,88 @@ contains
   this%k_decay_lwd    =  biogeo_con%k_decay_lwd
   this%k_decay_fwd    =  biogeo_con%k_decay_fwd
 
-  this%def_cn(resombgc_index%lit1) = biogeo_con%init_cn_met * natomw/catomw
-  this%def_cn(resombgc_index%lit2) = biogeo_con%init_cn_cel * natomw/catomw
-  this%def_cn(resombgc_index%lit3) = biogeo_con%init_cn_lig * natomw/catomw
-  this%def_cn(resombgc_index%cwd)  = biogeo_con%init_cn_cwd * natomw/catomw
-  this%def_cn(resombgc_index%lwd)  = biogeo_con%init_cn_lwd * natomw/catomw
-  this%def_cn(resombgc_index%fwd)  = biogeo_con%init_cn_fwd * natomw/catomw
+  this%def_cn(resom_bgc_index%lit1) = biogeo_con%init_cn_met * natomw/catomw
+  this%def_cn(resom_bgc_index%lit2) = biogeo_con%init_cn_cel * natomw/catomw
+  this%def_cn(resom_bgc_index%lit3) = biogeo_con%init_cn_lig * natomw/catomw
+  this%def_cn(resom_bgc_index%cwd)  = biogeo_con%init_cn_cwd * natomw/catomw
+  this%def_cn(resom_bgc_index%lwd)  = biogeo_con%init_cn_lwd * natomw/catomw
+  this%def_cn(resom_bgc_index%fwd)  = biogeo_con%init_cn_fwd * natomw/catomw
   
-  this%def_cn(resombgc_index%poly) = biogeo_con%init_cn_poly * natomw/catomw
-  this%def_cn(resombgc_index%mono) = biogeo_con%init_cn_mono * natomw/catomw
-  this%def_cn(resombgc_index%mic)  = biogeo_con%init_cn_mic * natomw/catomw
-  this%def_cn(resombgc_index%enz)  = biogeo_con%init_cn_enz * natomw/catomw
-  this%def_cn(resombgc_index%res)  = biogeo_con%init_cn_res * natomw/catomw
+  this%def_cn(resom_bgc_index%poly) = biogeo_con%init_cn_poly * natomw/catomw
+  this%def_cn(resom_bgc_index%mono) = biogeo_con%init_cn_mono * natomw/catomw
+  this%def_cn(resom_bgc_index%mic)  = biogeo_con%init_cn_mic * natomw/catomw
+  this%def_cn(resom_bgc_index%enz)  = biogeo_con%init_cn_enz * natomw/catomw
+  this%def_cn(resom_bgc_index%res)  = biogeo_con%init_cn_res * natomw/catomw
 
-  this%def_cp(resombgc_index%lit1) = biogeo_con%init_cp_met * patomw/catomw
-  this%def_cp(resombgc_index%lit2) = biogeo_con%init_cp_cel * patomw/catomw
-  this%def_cp(resombgc_index%lit3) = biogeo_con%init_cp_lig * patomw/catomw
-  this%def_cp(resombgc_index%cwd)  = biogeo_con%init_cp_cwd * patomw/catomw
-  this%def_cp(resombgc_index%lwd)  = biogeo_con%init_cp_lwd * patomw/catomw
-  this%def_cp(resombgc_index%fwd)  = biogeo_con%init_cp_fwd * patomw/catomw
+  this%def_cp(resom_bgc_index%lit1) = biogeo_con%init_cp_met * patomw/catomw
+  this%def_cp(resom_bgc_index%lit2) = biogeo_con%init_cp_cel * patomw/catomw
+  this%def_cp(resom_bgc_index%lit3) = biogeo_con%init_cp_lig * patomw/catomw
+  this%def_cp(resom_bgc_index%cwd)  = biogeo_con%init_cp_cwd * patomw/catomw
+  this%def_cp(resom_bgc_index%lwd)  = biogeo_con%init_cp_lwd * patomw/catomw
+  this%def_cp(resom_bgc_index%fwd)  = biogeo_con%init_cp_fwd * patomw/catomw
   
-  this%def_cp(resombgc_index%poly) = biogeo_con%init_cp_poly * patomw/catomw
-  this%def_cp(resombgc_index%mono) = biogeo_con%init_cp_mono * patomw/catomw
-  this%def_cp(resombgc_index%mic)  = biogeo_con%init_cp_mic * patomw/catomw
-  this%def_cp(resombgc_index%enz)  = biogeo_con%init_cp_enz * patomw/catomw
-  this%def_cp(resombgc_index%res)  = biogeo_con%init_cp_res * patomw/catomw
+  this%def_cp(resom_bgc_index%poly) = biogeo_con%init_cp_poly * patomw/catomw
+  this%def_cp(resom_bgc_index%mono) = biogeo_con%init_cp_mono * patomw/catomw
+  this%def_cp(resom_bgc_index%mic)  = biogeo_con%init_cp_mic * patomw/catomw
+  this%def_cp(resom_bgc_index%enz)  = biogeo_con%init_cp_enz * patomw/catomw
+  this%def_cp(resom_bgc_index%res)  = biogeo_con%init_cp_res * patomw/catomw
 
   this%use_c13=biogeo_con%use_c13
   this%use_c14=biogeo_con%use_c14
   this%use_warm=biogeo_con%use_warm
 
   if(this%use_c13)then
-    this%def_cc13(resombgc_index%lit1) = biogeo_con%init_cc13_met
-    this%def_cc13(resombgc_index%lit2) = biogeo_con%init_cc13_cel
-    this%def_cc13(resombgc_index%lit3) = biogeo_con%init_cc13_lig
-    this%def_cc13(resombgc_index%cwd)  = biogeo_con%init_cc13_cwd
-    this%def_cc13(resombgc_index%lwd)  = biogeo_con%init_cc13_lwd
-    this%def_cc13(resombgc_index%fwd)  = biogeo_con%init_cc13_fwd
-    this%def_cc13(resombgc_index%poly) = biogeo_con%init_cc13_poly
-    this%def_cc13(resombgc_index%mono) = biogeo_con%init_cc13_mono
-    this%def_cc13(resombgc_index%mic)  = biogeo_con%init_cc13_mic
-    this%def_cc13(resombgc_index%enz)  = biogeo_con%init_cc13_enz
-    this%def_cc13(resombgc_index%res)  = biogeo_con%init_cc13_res
+    this%def_cc13(resom_bgc_index%lit1) = biogeo_con%init_cc13_met
+    this%def_cc13(resom_bgc_index%lit2) = biogeo_con%init_cc13_cel
+    this%def_cc13(resom_bgc_index%lit3) = biogeo_con%init_cc13_lig
+    this%def_cc13(resom_bgc_index%cwd)  = biogeo_con%init_cc13_cwd
+    this%def_cc13(resom_bgc_index%lwd)  = biogeo_con%init_cc13_lwd
+    this%def_cc13(resom_bgc_index%fwd)  = biogeo_con%init_cc13_fwd
+    this%def_cc13(resom_bgc_index%poly) = biogeo_con%init_cc13_poly
+    this%def_cc13(resom_bgc_index%mono) = biogeo_con%init_cc13_mono
+    this%def_cc13(resom_bgc_index%mic)  = biogeo_con%init_cc13_mic
+    this%def_cc13(resom_bgc_index%enz)  = biogeo_con%init_cc13_enz
+    this%def_cc13(resom_bgc_index%res)  = biogeo_con%init_cc13_res
   endif
 
   if(this%use_c14)then
-    this%def_cc14(resombgc_index%lit1) = biogeo_con%init_cc14_met
-    this%def_cc14(resombgc_index%lit2) = biogeo_con%init_cc14_cel
-    this%def_cc14(resombgc_index%lit3) = biogeo_con%init_cc14_lig
-    this%def_cc14(resombgc_index%cwd)  = biogeo_con%init_cc14_cwd
-    this%def_cc14(resombgc_index%lwd)  = biogeo_con%init_cc14_lwd
-    this%def_cc14(resombgc_index%fwd)  = biogeo_con%init_cc14_fwd
-    this%def_cc14(resombgc_index%poly) = biogeo_con%init_cc14_poly
-    this%def_cc14(resombgc_index%mono) = biogeo_con%init_cc14_mono
-    this%def_cc14(resombgc_index%mic) = biogeo_con%init_cc14_mic
-    this%def_cc14(resombgc_index%enz) = biogeo_con%init_cc14_enz
-    this%def_cc14(resombgc_index%res) = biogeo_con%init_cc14_res
+    this%def_cc14(resom_bgc_index%lit1) = biogeo_con%init_cc14_met
+    this%def_cc14(resom_bgc_index%lit2) = biogeo_con%init_cc14_cel
+    this%def_cc14(resom_bgc_index%lit3) = biogeo_con%init_cc14_lig
+    this%def_cc14(resom_bgc_index%cwd)  = biogeo_con%init_cc14_cwd
+    this%def_cc14(resom_bgc_index%lwd)  = biogeo_con%init_cc14_lwd
+    this%def_cc14(resom_bgc_index%fwd)  = biogeo_con%init_cc14_fwd
+    this%def_cc14(resom_bgc_index%poly) = biogeo_con%init_cc14_poly
+    this%def_cc14(resom_bgc_index%mono) = biogeo_con%init_cc14_mono
+    this%def_cc14(resom_bgc_index%mic) = biogeo_con%init_cc14_mic
+    this%def_cc14(resom_bgc_index%enz) = biogeo_con%init_cc14_enz
+    this%def_cc14(resom_bgc_index%res) = biogeo_con%init_cc14_res
 
   endif
 
   end subroutine UpdateParas
 !------------------------------------------
 
-  subroutine run_decomp(this, is_surflit, resombgc_index, dtime, ystates,&
+  subroutine run_decomp(this, is_surflit, resom_bgc_index, dtime, ystates,&
       decompkf_eca, alpha_n, alpha_p, cascade_matrix, &
       k_decay, pot_co2_hr, bstatus)
   !
   !DESCRIPTION
   !
-  use BgcresomIndexType     , only : resombgc_index_type
-  use BgcresomDecompType    , only : Decompresom_type
+  use resomBGCIndexType     , only : resom_bgc_index_type
+  use resomBGCDecompType    , only : Decompresom_type
   use BetrStatusType        , only : betr_status_type
   use betr_ctrl           , only : betr_spinup_state
   implicit none
   class(resomSom_type)        , intent(inout) :: this
-  type(resombgc_index_type)   , intent(in) :: resombgc_index
+  type(resom_bgc_index_type)   , intent(in) :: resom_bgc_index
   real(r8)                    , intent(in) :: dtime
-  real(r8)                    , intent(inout) :: ystates(1:resombgc_index%nom_tot_elms)
+  real(r8)                    , intent(inout) :: ystates(1:resom_bgc_index%nom_tot_elms)
   type(Decompresom_type)      , intent(in) :: decompkf_eca
   logical                     , intent(in) :: is_surflit
   !real(r8)                    , intent(in) :: pct_sand
   !real(r8)                    , intent(in) :: pct_clay
-  real(r8)                    , intent(inout) :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+  real(r8)                    , intent(inout) :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
   real(r8)                    , intent(out) :: k_decay(1:nresompools)
   real(r8)                    , intent(out) :: pot_co2_hr
   real(r8)                    , intent(out) :: alpha_n(1:nresompools)
@@ -258,9 +258,9 @@ contains
   integer :: kc, jj, lay
 
   associate(                                      &
-    nelms => resombgc_index%nelms,              &
-    nom_tot_elms=> resombgc_index%nom_tot_elms, &
-    c_loc => resombgc_index%c_loc               &
+    nelms => resom_bgc_index%nelms,              &
+    nom_tot_elms=> resom_bgc_index%nom_tot_elms, &
+    c_loc => resom_bgc_index%c_loc               &
   )
   call bstatus%reset()
 
@@ -269,29 +269,29 @@ contains
   else
     lay=2
   endif
-  call this%calc_cnp_ratios(resombgc_index, ystates, bstatus)
+  call this%calc_cnp_ratios(resom_bgc_index, ystates, bstatus)
   if (bstatus%check_status())return
   !calculate potential decay coefficients (1/s)
-  !call this%calc_som_decay_k(lay, resombgc_index, decompkf_eca, k_decay, ystates, bstatus)
-  call this%calc_som_decay_k(lay, resombgc_index, decompkf_eca, k_decay(1:nresompools), ystates, bstatus)
+  !call this%calc_som_decay_k(lay, resom_bgc_index, decompkf_eca, k_decay, ystates, bstatus)
+  call this%calc_som_decay_k(lay, resom_bgc_index, decompkf_eca, k_decay(1:nresompools), ystates, bstatus)
 
   !scale potential decay coefficients by temp (1/s)
-  call this%calc_som_scale_k(lay, resombgc_index, decompkf_eca, k_decay(1:nresompools))
+  call this%calc_som_scale_k(lay, resom_bgc_index, decompkf_eca, k_decay(1:nresompools))
 
   !calculate potential decay rates (mol C / s)
-  call this%calc_som_decay_r(resombgc_index, dtime, k_decay(1:nresompools), &
+  call this%calc_som_decay_r(resom_bgc_index, dtime, k_decay(1:nresompools), &
       ystates(1:nom_tot_elms), pot_om_decay_rates)
 
   !calculate custom fluxes  
-  ystates(resombgc_index%lid_decomp) = pot_om_decay_rates(resombgc_index%poly)
-  ystates(resombgc_index%lid_uptake) = pot_om_decay_rates(resombgc_index%mono)*(1._r8-this%yld_res)
-  ystates(resombgc_index%lid_cue)    = this%cue
-  ystates(resombgc_index%lid_maint)  = ystates((resombgc_index%mic-1) * nelms + c_loc)*this%actmr
-  ystates(resombgc_index%lid_kaffmm) = decompkf_eca%kaff_mono_msurf
-  ystates(resombgc_index%lid_kaffem) = decompkf_eca%kaff_enz_msurf
-  ystates(resombgc_index%lid_micgrow)= ystates((resombgc_index%mic-1) * nelms + c_loc)*this%actgB
-  ystates(resombgc_index%lid_enzprod)= ystates((resombgc_index%mic-1) * nelms + c_loc)*this%actpE
-  ystates(resombgc_index%lid_turnover)= ystates((resombgc_index%mic-1) * nelms + c_loc)*this%decay_mic
+  ystates(resom_bgc_index%lid_decomp) = pot_om_decay_rates(resom_bgc_index%poly)
+  ystates(resom_bgc_index%lid_uptake) = pot_om_decay_rates(resom_bgc_index%mono)*(1._r8-this%yld_res)
+  ystates(resom_bgc_index%lid_cue)    = this%cue
+  ystates(resom_bgc_index%lid_maint)  = ystates((resom_bgc_index%mic-1) * nelms + c_loc)*this%actmr
+  ystates(resom_bgc_index%lid_kaffmm) = decompkf_eca%kaff_mono_msurf
+  ystates(resom_bgc_index%lid_kaffem) = decompkf_eca%kaff_enz_msurf
+  ystates(resom_bgc_index%lid_micgrow)= ystates((resom_bgc_index%mic-1) * nelms + c_loc)*this%actgB
+  ystates(resom_bgc_index%lid_enzprod)= ystates((resom_bgc_index%mic-1) * nelms + c_loc)*this%actpE
+  ystates(resom_bgc_index%lid_turnover)= ystates((resom_bgc_index%mic-1) * nelms + c_loc)*this%decay_mic
       
   do jj = 1, nresompools
     kc = (jj-1) * nelms + c_loc
@@ -299,18 +299,18 @@ contains
     pot_om_decay_rates(jj) = min(pot_om_decay_rates(jj), ystates(kc)/dtime)
   enddo
 
-  call this%calc_cascade_matrix(lay, resombgc_index, alpha_n, alpha_p, cascade_matrix)
+  call this%calc_cascade_matrix(lay, resom_bgc_index, alpha_n, alpha_p, cascade_matrix)
 
   !calculate potential respiration rates by summarizing all om decomposition pathways
-  call this%calc_potential_aerobic_hr(resombgc_index, pot_om_decay_rates, &
+  call this%calc_potential_aerobic_hr(resom_bgc_index, pot_om_decay_rates, &
     cascade_matrix, pot_co2_hr, bstatus)
 
   end associate
   end subroutine run_decomp
 !------------------------------------------
 
-  subroutine calc_cascade_matrix(this, lay, resombgc_index, alpha_n, alpha_p, cascade_matrix)
-  !subroutine calc_cascade_matrix(this, is_surf, resombgc_index, pct_sand, pct_clay, alpha_n, alpha_p, cascade_matrix)
+  subroutine calc_cascade_matrix(this, lay, resom_bgc_index, alpha_n, alpha_p, cascade_matrix)
+  !subroutine calc_cascade_matrix(this, is_surf, resom_bgc_index, pct_sand, pct_clay, alpha_n, alpha_p, cascade_matrix)
 
   !
   ! DESCRIPTION
@@ -318,18 +318,18 @@ contains
   ! in all the reactions, the nominal carbon oxidation status is assumed as zero, which is apparently not correct.
   ! It is also assumed the recycling of nitrogen and phosphorus during decomposition is 100%, which is likely
   ! not quite right as well.
-  use BgcresomIndexType   , only : resombgc_index_type
+  use resomBGCIndexType   , only : resom_bgc_index_type
   use MathfuncMod         , only : safe_div, fpmax
   use betr_constants      , only : stdout                            !-zlyu
   implicit none
   class(resomSom_type),          intent(inout) :: this
-  type(resombgc_index_type)    , intent(in)    :: resombgc_index
+  type(resom_bgc_index_type)    , intent(in)    :: resom_bgc_index
   integer                      , intent(in)    :: lay
   !real(r8)                     , intent(in)    :: pct_sand
   !real(r8)                     , intent(in)    :: pct_clay
   real(r8)                     , intent(out)   :: alpha_n(nresompools) !indicating factor for nitrogen limitation
   real(r8)                     , intent(out)   :: alpha_p(nresompools) !indicating factor for phosphorus limitation
-  real(r8)                     , intent(inout) :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+  real(r8)                     , intent(inout) :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
 
   integer  :: reac,jj
   real(r8) :: f1, f2, rf_s1
@@ -338,43 +338,43 @@ contains
     !logical  :: use_c14
 
   associate(                                                   &
-    lit1      => resombgc_index%lit1                       , & !
-    lit2      => resombgc_index%lit2                       , & !
-    lit3      => resombgc_index%lit3                       , & !
-    poly      => resombgc_index%poly                       , & !
-    mono      => resombgc_index%mono                       , & !
-    res      => resombgc_index%res                         , & !
-    mic      => resombgc_index%mic                         , & !
-    enz      => resombgc_index%enz                         , & !
-    cwd       => resombgc_index%cwd                        , & !
-    lwd       => resombgc_index%lwd                        , & !
-    fwd       => resombgc_index%fwd                        , & !
-    c_loc     => resombgc_index%c_loc                      , & !
-    n_loc     => resombgc_index%n_loc                      , & !
-    p_loc     => resombgc_index%p_loc                      , & !
-    c13_loc   => resombgc_index%c13_loc                    , & !
-    c14_loc   => resombgc_index%c14_loc                    , & !
-    nelms     => resombgc_index%nelms                      , & !
-    lid_o2    => resombgc_index%lid_o2                     , & !
-    lid_co2   => resombgc_index%lid_co2                    , & !
-    lid_nh4   => resombgc_index%lid_nh4                    , & !
-    lid_c14_co2=> resombgc_index%lid_c14_co2               , & !
-    lid_c13_co2=> resombgc_index%lid_c13_co2               , & !
-    lid_co2_hr => resombgc_index%lid_co2_hr                , &
-    lid_minn_nh4_immob=> resombgc_index%lid_minn_nh4_immob , &
-    lid_minp_immob => resombgc_index%lid_minp_immob        , &
-    lid_minp_soluble=> resombgc_index%lid_minp_soluble     , &
-    lit1_dek_reac => resombgc_index%lit1_dek_reac          , &
-    lit2_dek_reac => resombgc_index%lit2_dek_reac          , &
-    lit3_dek_reac => resombgc_index%lit3_dek_reac          , &
-    poly_dek_reac => resombgc_index%poly_dek_reac          , &
-    mono_dek_reac => resombgc_index%mono_dek_reac          , &
-    mic_dek_reac => resombgc_index%mic_dek_reac            , &
-    enz_dek_reac => resombgc_index%enz_dek_reac            , &
-    res_dek_reac => resombgc_index%res_dek_reac            , &
-    cwd_dek_reac => resombgc_index%cwd_dek_reac            , &
-    lwd_dek_reac => resombgc_index%lwd_dek_reac            , &
-    fwd_dek_reac => resombgc_index%fwd_dek_reac            , &
+    lit1      => resom_bgc_index%lit1                       , & !
+    lit2      => resom_bgc_index%lit2                       , & !
+    lit3      => resom_bgc_index%lit3                       , & !
+    poly      => resom_bgc_index%poly                       , & !
+    mono      => resom_bgc_index%mono                       , & !
+    res      => resom_bgc_index%res                         , & !
+    mic      => resom_bgc_index%mic                         , & !
+    enz      => resom_bgc_index%enz                         , & !
+    cwd       => resom_bgc_index%cwd                        , & !
+    lwd       => resom_bgc_index%lwd                        , & !
+    fwd       => resom_bgc_index%fwd                        , & !
+    c_loc     => resom_bgc_index%c_loc                      , & !
+    n_loc     => resom_bgc_index%n_loc                      , & !
+    p_loc     => resom_bgc_index%p_loc                      , & !
+    c13_loc   => resom_bgc_index%c13_loc                    , & !
+    c14_loc   => resom_bgc_index%c14_loc                    , & !
+    nelms     => resom_bgc_index%nelms                      , & !
+    lid_o2    => resom_bgc_index%lid_o2                     , & !
+    lid_co2   => resom_bgc_index%lid_co2                    , & !
+    lid_nh4   => resom_bgc_index%lid_nh4                    , & !
+    lid_c14_co2=> resom_bgc_index%lid_c14_co2               , & !
+    lid_c13_co2=> resom_bgc_index%lid_c13_co2               , & !
+    lid_co2_hr => resom_bgc_index%lid_co2_hr                , &
+    lid_minn_nh4_immob=> resom_bgc_index%lid_minn_nh4_immob , &
+    lid_minp_immob => resom_bgc_index%lid_minp_immob        , &
+    lid_minp_soluble=> resom_bgc_index%lid_minp_soluble     , &
+    lit1_dek_reac => resom_bgc_index%lit1_dek_reac          , &
+    lit2_dek_reac => resom_bgc_index%lit2_dek_reac          , &
+    lit3_dek_reac => resom_bgc_index%lit3_dek_reac          , &
+    poly_dek_reac => resom_bgc_index%poly_dek_reac          , &
+    mono_dek_reac => resom_bgc_index%mono_dek_reac          , &
+    mic_dek_reac => resom_bgc_index%mic_dek_reac            , &
+    enz_dek_reac => resom_bgc_index%enz_dek_reac            , &
+    res_dek_reac => resom_bgc_index%res_dek_reac            , &
+    cwd_dek_reac => resom_bgc_index%cwd_dek_reac            , &
+    lwd_dek_reac => resom_bgc_index%lwd_dek_reac            , &
+    fwd_dek_reac => resom_bgc_index%fwd_dek_reac            , &
     cwd_fcel     => this%cwd_fcel                            , &
     cwd_flig     => this%cwd_flig                            , &
     lwd_fcel     => this%lwd_fcel                            , &
@@ -393,7 +393,7 @@ contains
     part_mic2enz  => this%part_mic2enz                       , &
     part_res2mono => this%part_res2mono                      , &
     rate_co2     => this%rate_co2                            , &
-    debug        => resombgc_index%debug                       &
+    debug        => resom_bgc_index%debug                       &
   )
 
     alpha_n = 0._r8; alpha_p = 0._r8
@@ -924,23 +924,23 @@ contains
     integer , intent(in) :: iwd, reac
     real(r8), intent(in):: f1, f2
     associate(                                                   &
-      c_loc     => resombgc_index%c_loc                      , & !
-      n_loc     => resombgc_index%n_loc                      , & !
-      p_loc     => resombgc_index%p_loc                      , & !
-      c13_loc   => resombgc_index%c13_loc                    , & !
-      c14_loc   => resombgc_index%c14_loc                    , & !
-      nelms     => resombgc_index%nelms                      , & !
-      lid_o2    => resombgc_index%lid_o2                     , & !
-      lid_co2   => resombgc_index%lid_co2                    , & !
-      lid_nh4   => resombgc_index%lid_nh4                    , & !
-      lid_c14_co2=> resombgc_index%lid_c14_co2               , & !
-      lid_c13_co2=> resombgc_index%lid_c13_co2               , & !
-      lid_co2_hr => resombgc_index%lid_co2_hr                , &
-      lid_minn_nh4_immob=> resombgc_index%lid_minn_nh4_immob , &
-      lid_minp_immob => resombgc_index%lid_minp_immob        , &
-      lid_minp_soluble=> resombgc_index%lid_minp_soluble     , &
-      poly      => resombgc_index%poly                       , & !
-      mono      => resombgc_index%mono                         & !
+      c_loc     => resom_bgc_index%c_loc                      , & !
+      n_loc     => resom_bgc_index%n_loc                      , & !
+      p_loc     => resom_bgc_index%p_loc                      , & !
+      c13_loc   => resom_bgc_index%c13_loc                    , & !
+      c14_loc   => resom_bgc_index%c14_loc                    , & !
+      nelms     => resom_bgc_index%nelms                      , & !
+      lid_o2    => resom_bgc_index%lid_o2                     , & !
+      lid_co2   => resom_bgc_index%lid_co2                    , & !
+      lid_nh4   => resom_bgc_index%lid_nh4                    , & !
+      lid_c14_co2=> resom_bgc_index%lid_c14_co2               , & !
+      lid_c13_co2=> resom_bgc_index%lid_c13_co2               , & !
+      lid_co2_hr => resom_bgc_index%lid_co2_hr                , &
+      lid_minn_nh4_immob=> resom_bgc_index%lid_minn_nh4_immob , &
+      lid_minp_immob => resom_bgc_index%lid_minp_immob        , &
+      lid_minp_soluble=> resom_bgc_index%lid_minp_soluble     , &
+      poly      => resom_bgc_index%poly                       , & !
+      mono      => resom_bgc_index%mono                         & !
     )
     cascade_matrix((iwd-1)*nelms+c_loc    ,reac) = -1._r8
     cascade_matrix((iwd-1)*nelms+n_loc    ,reac) = -this%icn_ratios(iwd)
@@ -997,7 +997,7 @@ contains
   end subroutine calc_cascade_matrix
 
   !-----------------------------------------------------------------------
-  subroutine calc_potential_aerobic_hr(this, resombgc_index, pot_decay_rates, &
+  subroutine calc_potential_aerobic_hr(this, resom_bgc_index, pot_decay_rates, &
     cascade_matrix, pot_co2_hr, bstatus)
     !
     ! DESCRIPTION:
@@ -1005,14 +1005,14 @@ contains
     ! !USES:
     use MathfuncMod         , only : dot_sum
     use MathfuncMod         , only : safe_div
-    use BgcresomIndexType   , only : resombgc_index_type
+    use resomBGCIndexType   , only : resom_bgc_index_type
     use BetrStatusType, only : betr_status_type
     implicit none
     ! !ARGUMENTS:
     class(resomSom_type)    , intent(inout) :: this
-    type(resombgc_index_type) , intent(in) :: resombgc_index
+    type(resom_bgc_index_type) , intent(in) :: resom_bgc_index
     real(r8)                , intent(in) :: pot_decay_rates(nresompools)
-    real(r8)                , intent(in) :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+    real(r8)                , intent(in) :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
     real(r8)                , intent(out):: pot_co2_hr
     type(betr_status_type)  , intent(out) :: bstatus
     ! !LOCAL VARIABLES:
@@ -1020,30 +1020,30 @@ contains
     integer  :: reac
 
     associate(                                           & !
-         nom_pools => resombgc_index%nom_pools        , & !
-         lid_co2_hr=> resombgc_index%lid_co2_hr       , & !
-         lit1      => resombgc_index%lit1             , & !
-         lit2      => resombgc_index%lit2             , & !
-         lit3      => resombgc_index%lit3             , & !
-         mic      => resombgc_index%mic               , & !
-         res      => resombgc_index%res               , & !
-         enz      => resombgc_index%enz               , & !
-         mono      => resombgc_index%mono             , & !
-         poly      => resombgc_index%poly             , & !
-         cwd       => resombgc_index%cwd              , & !
-         lwd       => resombgc_index%lwd              , & !
-         fwd       => resombgc_index%fwd              , & !
-         lit1_dek_reac=> resombgc_index%lit1_dek_reac , & !
-         lit2_dek_reac=> resombgc_index%lit2_dek_reac , & !
-         lit3_dek_reac=> resombgc_index%lit3_dek_reac , & !
-         poly_dek_reac=> resombgc_index%poly_dek_reac , & !
-         mono_dek_reac=> resombgc_index%mono_dek_reac , & !
-         mic_dek_reac=>  resombgc_index%mic_dek_reac  , & !
-         enz_dek_reac=>  resombgc_index%enz_dek_reac  , & !
-         res_dek_reac=>  resombgc_index%res_dek_reac  , & !
-         cwd_dek_reac=> resombgc_index%cwd_dek_reac   , & !
-         lwd_dek_reac=> resombgc_index%lwd_dek_reac   , & !
-         fwd_dek_reac=> resombgc_index%fwd_dek_reac     & !
+         nom_pools => resom_bgc_index%nom_pools        , & !
+         lid_co2_hr=> resom_bgc_index%lid_co2_hr       , & !
+         lit1      => resom_bgc_index%lit1             , & !
+         lit2      => resom_bgc_index%lit2             , & !
+         lit3      => resom_bgc_index%lit3             , & !
+         mic      => resom_bgc_index%mic               , & !
+         res      => resom_bgc_index%res               , & !
+         enz      => resom_bgc_index%enz               , & !
+         mono      => resom_bgc_index%mono             , & !
+         poly      => resom_bgc_index%poly             , & !
+         cwd       => resom_bgc_index%cwd              , & !
+         lwd       => resom_bgc_index%lwd              , & !
+         fwd       => resom_bgc_index%fwd              , & !
+         lit1_dek_reac=> resom_bgc_index%lit1_dek_reac , & !
+         lit2_dek_reac=> resom_bgc_index%lit2_dek_reac , & !
+         lit3_dek_reac=> resom_bgc_index%lit3_dek_reac , & !
+         poly_dek_reac=> resom_bgc_index%poly_dek_reac , & !
+         mono_dek_reac=> resom_bgc_index%mono_dek_reac , & !
+         mic_dek_reac=>  resom_bgc_index%mic_dek_reac  , & !
+         enz_dek_reac=>  resom_bgc_index%enz_dek_reac  , & !
+         res_dek_reac=>  resom_bgc_index%res_dek_reac  , & !
+         cwd_dek_reac=> resom_bgc_index%cwd_dek_reac   , & !
+         lwd_dek_reac=> resom_bgc_index%lwd_dek_reac   , & !
+         fwd_dek_reac=> resom_bgc_index%fwd_dek_reac     & !
          )
 
     cascade_matrix_hr = 0._r8
@@ -1064,17 +1064,17 @@ contains
   end subroutine calc_potential_aerobic_hr
 
   !-----------------------------------------------------------------------
-  subroutine calc_cnp_ratios(this, resombgc_index, ystates, bstatus)
+  subroutine calc_cnp_ratios(this, resom_bgc_index, ystates, bstatus)
   !
   ! DESCRIPTION
   ! compute the cnp ratios for the om pools
   use BetrStatusType      , only : betr_status_type
   use MathfuncMod         , only : safe_div
-  use BgcresomIndexType       , only : resombgc_index_type
+  use resomBGCIndexType       , only : resom_bgc_index_type
   implicit none
   class(resomSom_type)        , intent(inout) :: this
-  type(resombgc_index_type)   , intent(in) :: resombgc_index
-  real(r8)                    , intent(inout) :: ystates(resombgc_index%nstvars)
+  type(resom_bgc_index_type)   , intent(in) :: resom_bgc_index
+  real(r8)                    , intent(inout) :: ystates(resom_bgc_index%nstvars)
   type(betr_status_type)      , intent(out) :: bstatus
   integer :: jj
   integer :: kc, kn, kp, kc13, kc14, kc1, kc2
@@ -1085,16 +1085,16 @@ contains
   real(r8), parameter :: tiny_val=1.e-14_r8
   real(r8), parameter :: tiny_ncon = 1.e-15_r8 
   associate(                         &
-    nelms => resombgc_index%nelms, &
-    c_loc => resombgc_index%c_loc, &
-    n_loc => resombgc_index%n_loc, &
-    p_loc => resombgc_index%p_loc, &
-    c13_loc => resombgc_index%c13_loc, &
-    c14_loc => resombgc_index%c14_loc, &
-    lit2  => resombgc_index%lit2, &
-    lit3  => resombgc_index%lit3, &
-    is_sumpool_som => resombgc_index%is_sumpool_som, &
-    ompoolnames => resombgc_index%ompoolnames & 
+    nelms => resom_bgc_index%nelms, &
+    c_loc => resom_bgc_index%c_loc, &
+    n_loc => resom_bgc_index%n_loc, &
+    p_loc => resom_bgc_index%p_loc, &
+    c13_loc => resom_bgc_index%c13_loc, &
+    c14_loc => resom_bgc_index%c14_loc, &
+    lit2  => resom_bgc_index%lit2, &
+    lit3  => resom_bgc_index%lit3, &
+    is_sumpool_som => resom_bgc_index%is_sumpool_som, &
+    ompoolnames => resom_bgc_index%ompoolnames & 
   )
   
 call bstatus%reset()
@@ -1119,7 +1119,7 @@ call bstatus%reset()
     else
       this%icp_ratios(jj) = 1._r8/this%def_cp(jj)*(1._r8-rat)+ystates(kp)/ystates(kc)*rat
     endif
-    if(resombgc_index%debug)then
+    if(resom_bgc_index%debug)then
        write(*,'(A,X,I2,5(X,E20.10))')'cnp',jj,ystates(kc),ystates(kn),ystates(kp),1._r8/this%icn_ratios(jj),1._r8/this%icp_ratios(jj)
     endif
     if(is_sumpool_som(jj) .and. ystates(kc)>tiny_val)then
@@ -1137,7 +1137,7 @@ call bstatus%reset()
     if(this%use_c14)then
       kc14 = (jj-1) * nelms + c14_loc
       this%icc14_ratios(jj) = 1._r8/this%def_cc14(jj)*(1._r8-rat)+ystates(kc14)/ystates(kc)
-      if(resombgc_index%debug)then
+      if(resom_bgc_index%debug)then
         write(*,'(A,X,I4,2(X,E20.10))') 'c14rrr som jj',jj,1._r8/this%def_cc14(jj),this%icc14_ratios(jj)
       endif
     endif
@@ -1159,31 +1159,31 @@ call bstatus%reset()
 
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
-  subroutine stoichiometry_fix(this, resombgc_index,ystates) 
+  subroutine stoichiometry_fix(this, resom_bgc_index,ystates) 
 
   !
   ! DESCRIPTION
   ! this fixes the stoichiometric drift due to limite precision of 
   ! double precision.
-  use BgcresomIndexType         , only : resombgc_index_type
+  use resomBGCIndexType         , only : resom_bgc_index_type
   implicit none
   class(resomSom_type)          , intent(inout) :: this
-  type(resombgc_index_type)     , intent(in) :: resombgc_index
-  real(r8)                      , intent(inout) :: ystates(resombgc_index%nstvars)
+  type(resom_bgc_index_type)     , intent(in) :: resom_bgc_index
+  real(r8)                      , intent(inout) :: ystates(resom_bgc_index%nstvars)
 
   associate(                         &
-    nelms => resombgc_index%nelms, &
-    c_loc => resombgc_index%c_loc, &
-    n_loc => resombgc_index%n_loc, &
-    c13_loc => resombgc_index%c13_loc, &
-    c14_loc => resombgc_index%c14_loc, &
-    poly  => resombgc_index%poly , &
-    mono  => resombgc_index%mono , &
-    mic  => resombgc_index%mic , &
-    enz  => resombgc_index%enz , &
-    res  => resombgc_index%res , &
-    is_sumpool_som => resombgc_index%is_sumpool_som, &
-    ompoolnames => resombgc_index%ompoolnames &
+    nelms => resom_bgc_index%nelms, &
+    c_loc => resom_bgc_index%c_loc, &
+    n_loc => resom_bgc_index%n_loc, &
+    c13_loc => resom_bgc_index%c13_loc, &
+    c14_loc => resom_bgc_index%c14_loc, &
+    poly  => resom_bgc_index%poly , &
+    mono  => resom_bgc_index%mono , &
+    mic  => resom_bgc_index%mic , &
+    enz  => resom_bgc_index%enz , &
+    res  => resom_bgc_index%res , &
+    is_sumpool_som => resom_bgc_index%is_sumpool_som, &
+    ompoolnames => resom_bgc_index%ompoolnames &
   )
 
 
@@ -1209,9 +1209,9 @@ call bstatus%reset()
     real(r8), parameter :: tiny_ncon = 1.e-15_r8
 
     associate(                       &
-      nelms => resombgc_index%nelms, &
-      c_loc => resombgc_index%c_loc, &
-      n_loc => resombgc_index%n_loc  &
+      nelms => resom_bgc_index%nelms, &
+      c_loc => resom_bgc_index%c_loc, &
+      n_loc => resom_bgc_index%n_loc  &
     )
 
     kc = (jj-1) * nelms + c_loc
@@ -1226,28 +1226,28 @@ call bstatus%reset()
   end subroutine stoichiometry_fix
 
   !-------------------------------------------------------------------------------
-subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, om_decay_rates)
+subroutine calc_som_decay_r(this, resom_bgc_index, dtime, om_k_decay, om_pools, om_decay_rates)
     !
     ! !DESCRIPTION:
     ! calculate degradation for all different pools
     !
     ! !USES:
-    use BgcresomIndexType       , only : resombgc_index_type
+    use resomBGCIndexType       , only : resom_bgc_index_type
    implicit none
    class(resomSom_type)     , intent(inout) :: this
-   type(resombgc_index_type) , intent(in)    :: resombgc_index
+   type(resom_bgc_index_type) , intent(in)    :: resom_bgc_index
     real(r8)  , intent(in)    :: dtime
     real(r8)  , intent(in)    :: om_k_decay(nresompools)
-    real(r8)  , intent(in)    :: om_pools(resombgc_index%nom_tot_elms)
+    real(r8)  , intent(in)    :: om_pools(resom_bgc_index%nom_tot_elms)
     real(r8)  , intent(out)   :: om_decay_rates(nresompools)
 
     ! !LOCAL VARIABLES:
     integer :: jj, fc, c, j
     integer :: kc, kn
     associate(                                        &
-         nelms => resombgc_index%nelms            , &
-         nom_pools => resombgc_index%nom_pools    , &
-         c_loc => resombgc_index%c_loc              &
+         nelms => resom_bgc_index%nelms            , &
+         nom_pools => resom_bgc_index%nom_pools    , &
+         c_loc => resom_bgc_index%c_loc              &
     )
 
     !for om pools
@@ -1260,14 +1260,14 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
 
   !-------------------------------------------------------------------------------
  
-  subroutine apply_spinupf(this, resombgc_index, decompkf_eca, k_decay, spinup_scalar, spinup_flg)
-  use BgcresomIndexType       , only : resombgc_index_type
-  use BgcresomDecompType      , only : Decompresom_type
+  subroutine apply_spinupf(this, resom_bgc_index, decompkf_eca, k_decay, spinup_scalar, spinup_flg)
+  use resomBGCIndexType       , only : resom_bgc_index_type
+  use resomBGCDecompType      , only : Decompresom_type
   use betr_varcon               , only : kyr_spinup
   implicit none
   class(resomSom_type)     , intent(inout) :: this
   type(Decompresom_type), intent(in) :: decompkf_eca
-  type(resombgc_index_type)     , intent(in)    :: resombgc_index
+  type(resom_bgc_index_type)     , intent(in)    :: resom_bgc_index
   real(r8)                      , intent(inout) :: k_decay(nresompools)
   real(r8)                      , intent(inout) :: spinup_scalar
   integer                       , intent(in)    :: spinup_flg
@@ -1277,11 +1277,11 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
    t_scalar       => decompkf_eca%t_scalar        , & ! Intput: [real(r8) (:,:)   ]  soil temperature scalar for decomp
    w_scalar       => decompkf_eca%w_scalar        , & ! Intput: [real(r8) (:,:)   ]  soil water scalar for decomp
    o_scalar       => decompkf_eca%o_scalar        , & ! Intput: [real(r8) (:,:)   ]  fraction by which decomposition is limited by anoxia
-   poly           => resombgc_index%poly        , & !
-   mono           => resombgc_index%mono        , & !
-   mic            => resombgc_index%mic         , & !
-   enz            => resombgc_index%enz         , & !
-   res            => resombgc_index%res           & !
+   poly           => resom_bgc_index%poly        , & !
+   mono           => resom_bgc_index%mono        , & !
+   mic            => resom_bgc_index%mic         , & !
+   enz            => resom_bgc_index%enz         , & !
+   res            => resom_bgc_index%res           & !
   )
 
   if(spinup_flg==2)then
@@ -1298,16 +1298,16 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
 
   end subroutine apply_spinupf
   !-------------------------------------------------------------------------------
-  subroutine calc_som_scale_k(this, lay, resombgc_index, decompkf_eca, k_decay)
+  subroutine calc_som_scale_k(this, lay, resom_bgc_index, decompkf_eca, k_decay)
 
-  use BgcresomIndexType       , only : resombgc_index_type
-  use BgcresomDecompType      , only : Decompresom_type
+  use resomBGCIndexType       , only : resom_bgc_index_type
+  use resomBGCDecompType      , only : Decompresom_type
 
   implicit none
   class(resomSom_type)        , intent(inout) :: this
   integer                     , intent(in) :: lay
   type(Decompresom_type)      , intent(in)    :: decompkf_eca
-  type(resombgc_index_type)   , intent(in)    :: resombgc_index
+  type(resom_bgc_index_type)   , intent(in)    :: resom_bgc_index
   real(r8)                    , intent(inout)    :: k_decay(nresompools)
   integer :: jj
 
@@ -1316,17 +1316,17 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
    w_scalar       => decompkf_eca%w_scalar        , & ! Input: [real(r8) (:,:)   ]  soil water scalar for decomp
    o_scalar       => decompkf_eca%o_scalar        , & ! Input: [real(r8) (:,:)   ]  fraction by which decomposition is limited by anoxia
    depth_scalar   => decompkf_eca%depth_scalar    , & ! Input: [real(r8) (:,:)   ]  rate constant for decomposition (1./sec)
-   lit1           => resombgc_index%lit1               , & !
-   lit2           => resombgc_index%lit2               , & !
-   lit3           => resombgc_index%lit3               , & !
-   mic            => resombgc_index%mic                , & !
-   res            => resombgc_index%res                , & !
-   enz            => resombgc_index%enz                , & !
-   mono           => resombgc_index%mono               , & !
-   poly           => resombgc_index%poly               , & !
-   cwd            => resombgc_index%cwd                , & !
-   lwd            => resombgc_index%lwd                , & !
-   fwd            => resombgc_index%fwd                  & !
+   lit1           => resom_bgc_index%lit1               , & !
+   lit2           => resom_bgc_index%lit2               , & !
+   lit3           => resom_bgc_index%lit3               , & !
+   mic            => resom_bgc_index%mic                , & !
+   res            => resom_bgc_index%res                , & !
+   enz            => resom_bgc_index%enz                , & !
+   mono           => resom_bgc_index%mono               , & !
+   poly           => resom_bgc_index%poly               , & !
+   cwd            => resom_bgc_index%cwd                , & !
+   lwd            => resom_bgc_index%lwd                , & !
+   fwd            => resom_bgc_index%fwd                  & !
    )
 
   k_decay(lit1) = k_decay(lit1) * t_scalar *  w_scalar * o_scalar * depth_scalar
@@ -1365,15 +1365,15 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
   end associate
   end subroutine calc_som_scale_k
   !-------------------------------------------------------------------------------
-   subroutine calc_som_decay_k(this, lay, resombgc_index, decompkf_eca, k_decay, ystates, bstatus)
+   subroutine calc_som_decay_k(this, lay, resom_bgc_index, decompkf_eca, k_decay, ystates, bstatus)
 
-  use BgcresomIndexType       , only : resombgc_index_type
-  use BgcresomDecompType      , only : Decompresom_type
+  use resomBGCIndexType       , only : resom_bgc_index_type
+  use resomBGCDecompType      , only : Decompresom_type
   use MathfuncMod             , only : safe_div
   !use FindRootMod             , only : brent
   !use func_data_type_mod      , only : func_data_type
-  use BgcresomMath            , only : brent
-  use BgcresomDebType         , only : debs
+  use resomBGCMath            , only : brent
+  use resomBGCDebType         , only : debs
   use DebGrowMod              , only : deb_grow
   use BetrStatusType      , only : betr_status_type
 
@@ -1381,8 +1381,8 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
   class(resomSom_type)        , intent(inout)   :: this !this will update the relevant values for cascade_matrix
   integer                     , intent(in) :: lay
   type(Decompresom_type)      , intent(in)    :: decompkf_eca
-  type(resombgc_index_type)   , intent(in)    :: resombgc_index
-  real(r8)                    , intent(in)    :: ystates(1:resombgc_index%nom_tot_elms)
+  type(resom_bgc_index_type)   , intent(in)    :: resom_bgc_index
+  real(r8)                    , intent(in)    :: ystates(1:resom_bgc_index%nom_tot_elms)
   !real(r8)                    , intent(out)   :: k_decay(nresompools)
   real(r8)                    , intent(out)   :: k_decay(1:nresompools)
   type(betr_status_type)        , intent(out)   :: bstatus
@@ -1439,8 +1439,8 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
    gmax_mic => deb%gmax_mic           , &
    yld_mic => deb%yld_mic             , &
    pmax_enz => deb%pmax_enz           , &
-   nelms => resombgc_index%nelms                       , &
-   c_loc => resombgc_index%c_loc                       , &
+   nelms => resom_bgc_index%nelms                       , &
+   c_loc => resom_bgc_index%c_loc                       , &
    vmax_mic         => decompkf_eca%vmax_mic           , &
    vmax_enz         => decompkf_eca%vmax_enz           , &
    kaff_mono_mic    => decompkf_eca%kaff_mono_mic      , &
@@ -1448,17 +1448,17 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
    kappa_mic        => decompkf_eca%kappa_mic          , & !microbial metabolic (reserve) turnover rate
    kaff_mono_msurf  => decompkf_eca%kaff_mono_msurf    , &
    kaff_enz_msurf   => decompkf_eca%kaff_enz_msurf     , &
-   lit1           => resombgc_index%lit1               , & !
-   lit2           => resombgc_index%lit2               , & !
-   lit3           => resombgc_index%lit3               , & !
-   mic            => resombgc_index%mic                , & !
-   res            => resombgc_index%res                , & !
-   enz            => resombgc_index%enz                , & !
-   mono           => resombgc_index%mono               , & !
-   poly           => resombgc_index%poly               , & !
-   cwd            => resombgc_index%cwd                , & !
-   lwd            => resombgc_index%lwd                , & !
-   fwd            => resombgc_index%fwd                , & !
+   lit1           => resom_bgc_index%lit1               , & !
+   lit2           => resom_bgc_index%lit2               , & !
+   lit3           => resom_bgc_index%lit3               , & !
+   mic            => resom_bgc_index%mic                , & !
+   res            => resom_bgc_index%res                , & !
+   enz            => resom_bgc_index%enz                , & !
+   mono           => resom_bgc_index%mono               , & !
+   poly           => resom_bgc_index%poly               , & !
+   cwd            => resom_bgc_index%cwd                , & !
+   lwd            => resom_bgc_index%lwd                , & !
+   fwd            => resom_bgc_index%fwd                , & !
    yld_res        => this%yld_res                      , & !
    fenz2poly      => this%fenz2poly                    , & !
    minsite        => this%minsite                      , & !
@@ -1627,16 +1627,16 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
   end associate
   end subroutine calc_som_decay_k
   !-------------------------------------------------------------------------------
-  subroutine calc_pot_min_np_flx(this, dtime, resombgc_index, ystates, k_decay, cascade_matrix, &
+  subroutine calc_pot_min_np_flx(this, dtime, resom_bgc_index, ystates, k_decay, cascade_matrix, &
     alpha_n, alpha_p, pot_decomp, pot_nn_flx, pot_np_flx)
-  use BgcresomIndexType       , only : resombgc_index_type
+  use resomBGCIndexType       , only : resom_bgc_index_type
   implicit none
   class(resomSom_type)        , intent(inout) :: this
   real(r8)                    , intent(in) :: dtime
-  type(resombgc_index_type)   , intent(in) :: resombgc_index
-  real(r8)                    , intent(in) :: ystates(1:resombgc_index%nom_tot_elms)
+  type(resom_bgc_index_type)   , intent(in) :: resom_bgc_index
+  real(r8)                    , intent(in) :: ystates(1:resom_bgc_index%nom_tot_elms)
   real(r8)                    , intent(in) :: k_decay(1:nresompools)
-  real(r8)                    , intent(in) :: cascade_matrix(resombgc_index%nstvars, resombgc_index%nreactions)
+  real(r8)                    , intent(in) :: cascade_matrix(resom_bgc_index%nstvars, resom_bgc_index%nreactions)
   real(r8)                    , intent(in) :: alpha_n(nresompools)
   real(r8)                    , intent(in) :: alpha_p(nresompools)
   real(r8)                    , intent(out) :: pot_decomp(nresompools)
@@ -1647,34 +1647,34 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
   integer :: reacs(nresompools)
 
   associate(                                                    & !
-       nom_pools => resombgc_index%nom_pools                , & !
-       nom_tot_elms=> resombgc_index%nom_tot_elms           , & !
-       lid_nh4   => resombgc_index%lid_nh4                  , & !
-       lid_minp_soluble  => resombgc_index%lid_minp_soluble , & !
-       lit1      => resombgc_index%lit1                     , & !
-       lit2      => resombgc_index%lit2                     , & !
-       lit3      => resombgc_index%lit3                     , & !
-       mic      => resombgc_index%mic                       , & !
-       res      => resombgc_index%res                       , & !
-       enz      => resombgc_index%enz                       , & !
-       mono      => resombgc_index%mono                     , & !
-       poly      => resombgc_index%poly                     , & !
-       cwd       => resombgc_index%cwd                      , & !
-       lit1_dek_reac=> resombgc_index%lit1_dek_reac         , & !
-       lit2_dek_reac=> resombgc_index%lit2_dek_reac         , & !
-       lit3_dek_reac=> resombgc_index%lit3_dek_reac         , & !
-       poly_dek_reac=> resombgc_index%poly_dek_reac         , & !
-       mono_dek_reac=> resombgc_index%mono_dek_reac         , & !
-       mic_dek_reac=> resombgc_index%mic_dek_reac           , & !
-       enz_dek_reac=> resombgc_index%enz_dek_reac           , & !
-       res_dek_reac=> resombgc_index%res_dek_reac           , & !
-       cwd_dek_reac=> resombgc_index%cwd_dek_reac           , & !
-       lwd_dek_reac=> resombgc_index%lwd_dek_reac           , & !
-       fwd_dek_reac=> resombgc_index%fwd_dek_reac             & !
+       nom_pools => resom_bgc_index%nom_pools                , & !
+       nom_tot_elms=> resom_bgc_index%nom_tot_elms           , & !
+       lid_nh4   => resom_bgc_index%lid_nh4                  , & !
+       lid_minp_soluble  => resom_bgc_index%lid_minp_soluble , & !
+       lit1      => resom_bgc_index%lit1                     , & !
+       lit2      => resom_bgc_index%lit2                     , & !
+       lit3      => resom_bgc_index%lit3                     , & !
+       mic      => resom_bgc_index%mic                       , & !
+       res      => resom_bgc_index%res                       , & !
+       enz      => resom_bgc_index%enz                       , & !
+       mono      => resom_bgc_index%mono                     , & !
+       poly      => resom_bgc_index%poly                     , & !
+       cwd       => resom_bgc_index%cwd                      , & !
+       lit1_dek_reac=> resom_bgc_index%lit1_dek_reac         , & !
+       lit2_dek_reac=> resom_bgc_index%lit2_dek_reac         , & !
+       lit3_dek_reac=> resom_bgc_index%lit3_dek_reac         , & !
+       poly_dek_reac=> resom_bgc_index%poly_dek_reac         , & !
+       mono_dek_reac=> resom_bgc_index%mono_dek_reac         , & !
+       mic_dek_reac=> resom_bgc_index%mic_dek_reac           , & !
+       enz_dek_reac=> resom_bgc_index%enz_dek_reac           , & !
+       res_dek_reac=> resom_bgc_index%res_dek_reac           , & !
+       cwd_dek_reac=> resom_bgc_index%cwd_dek_reac           , & !
+       lwd_dek_reac=> resom_bgc_index%lwd_dek_reac           , & !
+       fwd_dek_reac=> resom_bgc_index%fwd_dek_reac             & !
    )
 
   !calculate potential decay rates (mol C / s)
-  call this%calc_som_decay_r(resombgc_index, dtime, k_decay(1:nom_pools), &
+  call this%calc_som_decay_r(resom_bgc_index, dtime, k_decay(1:nom_pools), &
       ystates(1:nom_tot_elms), pot_decomp)
 
   pot_nn_flx = 0._r8; pot_np_flx = 0._r8
@@ -1694,4 +1694,4 @@ subroutine calc_som_decay_r(this, resombgc_index, dtime, om_k_decay, om_pools, o
   end associate
   end subroutine calc_pot_min_np_flx
   !-------------------------------------------------------------------------------
-end module BgcresomSOMType
+end module resomBGCSOMType

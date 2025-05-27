@@ -1,4 +1,4 @@
-module PlantSoilBgcresomType
+module resomPlantSoilBGCType
 ! DESCRIPTION
 ! Borrowing Century ECACNP code for plant uptake
 
@@ -13,10 +13,10 @@ module PlantSoilBgcresomType
 
   character(len=*), private, parameter :: filename = &
        __FILE__
-  public :: plant_soilbgc_resom_type
+  public :: resom_plant_soilbgc_type
 
   type, extends(plant_soilbgc_type) :: &
-    plant_soilbgc_resom_type
+    resom_plant_soilbgc_type
 
     real(r8),pointer :: rt_vr_col(:,:) => null()
     real(r8),pointer :: plant_root_exudates_c(:) => null()
@@ -44,21 +44,21 @@ module PlantSoilBgcresomType
     procedure :: lsm_betr_plant_soilbgc_send
     procedure, private :: set_profiles_vars
     procedure, private :: InitAllocate
-  end type plant_soilbgc_resom_type
+  end type resom_plant_soilbgc_type
 
-  interface plant_soilbgc_resom_type
+  interface resom_plant_soilbgc_type
     module procedure constructor
-  end interface plant_soilbgc_resom_type
+  end interface resom_plant_soilbgc_type
 
   contains
 
   !-------------------------------------------------------------------------------
-  type(plant_soilbgc_resom_type) function constructor()
+  type(resom_plant_soilbgc_type) function constructor()
   !
   ! !DESCRIPTION:
-  ! create an object of type plant_soilbgc_resom_type.
+  ! create an object of type resom_plant_soilbgc_type.
   ! Right now it is purposely empty
-   type(plant_soilbgc_resom_type), allocatable :: plants
+   type(resom_plant_soilbgc_type), allocatable :: plants
    allocate(plants)
    constructor = plants
   end function constructor
@@ -75,7 +75,7 @@ module PlantSoilBgcresomType
   use BeTR_decompMod       , only : betr_bounds_type
   implicit none
   ! !ARGUMENTS:
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)         , intent(in) :: bounds
   integer                   , intent(in) :: lbj, ubj
   character(len=*)          , intent(in) :: namelist_buffer
@@ -92,7 +92,7 @@ module PlantSoilBgcresomType
   use betr_varcon         , only : betr_maxpatch_pft
   implicit none
   ! !ARGUMENTS:
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)         , intent(in) :: bounds
   integer                   , intent(in) :: lbj, ubj
 
@@ -136,7 +136,7 @@ module PlantSoilBgcresomType
   use BeTR_biogeoFluxType  , only : betr_biogeo_flux_type
   implicit none
   ! !ARGUMENTS:
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)        , intent(in) :: bounds
   integer                   , intent(in) :: lbj, ubj
   type(betr_patch_type)     , intent(in) :: pft
@@ -202,7 +202,7 @@ module PlantSoilBgcresomType
   implicit none
   ! !ARGUMENTS:
 
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)         , intent(in) :: bounds
   integer                   , intent(in) :: numf
   integer                   , intent(in) :: filter(:)
@@ -224,7 +224,7 @@ module PlantSoilBgcresomType
   implicit none
   ! !ARGUMENTS:
 
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)      , intent(in)    :: bounds
   integer                     , intent(in)    :: numf
   integer                     , intent(in)    :: filter(:)
@@ -247,7 +247,7 @@ module PlantSoilBgcresomType
   use BeTR_PatchType, only : betr_patch_type
   implicit none
   ! !ARGUMENTS:
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)       , intent(in) :: bounds
   integer                      , intent(in) :: numf
   integer                      , intent(in) :: filter(:)
@@ -277,7 +277,7 @@ module PlantSoilBgcresomType
   use betr_constants       , only : stdout                            !-zlyu
   implicit none
   ! !ARGUMENTS:
-  class(plant_soilbgc_resom_type) , intent(inout) :: this
+  class(resom_plant_soilbgc_type) , intent(inout) :: this
   type(betr_bounds_type)       , intent(in) :: bounds
   integer                      , intent(in) :: numf
   integer                      , intent(in) :: filter(:)
@@ -297,4 +297,4 @@ module PlantSoilBgcresomType
 
   end subroutine set_profiles_vars
   !----------------------------------------------------------------------
-end module PlantSoilBgcresomType
+end module resomPlantSoilBGCType

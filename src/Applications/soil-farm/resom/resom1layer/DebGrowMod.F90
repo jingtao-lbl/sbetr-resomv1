@@ -3,7 +3,7 @@
 
   ! !USES:
   use bshr_kind_mod , only : r8 => shr_kind_r8
-  use BgcresomDebType         , only : debs
+  use resomBGCDebType         , only : debs
   use MathfuncMod             , only : safe_div
 
   implicit none
@@ -12,7 +12,7 @@ contains
   !-------------------------------------------------------------------------------
 subroutine deb_grow(gbt,deb,residual)
     !use func_data_type_mod      , only : func_data_type
-    use BgcresomDebType         , only : debs
+    use resomBGCDebType         , only : debs
     use MathfuncMod             , only : safe_div
     implicit none
 

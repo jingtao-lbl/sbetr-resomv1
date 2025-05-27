@@ -1,4 +1,4 @@
-module BgcresomIndexType
+module resomBGCIndexType
 
   use bshr_kind_mod  , only : r8 => shr_kind_r8
   use betr_ctrl    , only : spinup_state => betr_spinup_state
@@ -16,7 +16,7 @@ implicit none
     type(list_t), pointer :: next => null()
   end type list_t
 
-  type, public :: resombgc_index_type
+  type, public :: resom_bgc_index_type
      integer           :: nom_pools
 
      integer           :: nom_tot_elms
@@ -124,7 +124,7 @@ implicit none
      procedure, private :: InitPars
      procedure, private :: InitAllocate
      procedure, private :: set_primvar_reac_ids
-  end type resombgc_index_type
+  end type resom_bgc_index_type
 
   contains
   !-----------------------------------------------------------------------
@@ -265,7 +265,7 @@ implicit none
     ! !USES:
   implicit none
   ! !ARGUMENTS:
-  class(resombgc_index_type), intent(inout) :: this
+  class(resom_bgc_index_type), intent(inout) :: this
   logical, intent(in) :: use_c13
   logical, intent(in) :: use_c14
   logical, intent(in) :: non_limit
@@ -321,7 +321,7 @@ implicit none
 
     implicit none
 
-    class(resombgc_index_type) :: this
+    class(resom_bgc_index_type) :: this
     integer, intent(in) :: maxpft
     logical, intent(in) :: use_c13
     logical, intent(in) :: use_c14
@@ -647,7 +647,7 @@ implicit none
     !
   implicit none
     ! !ARGUMENTS:
-  class(resombgc_index_type), intent(inout) :: this
+  class(resom_bgc_index_type), intent(inout) :: this
 
   end subroutine InitAllocate
   !-------------------------------------------------------------------------------
@@ -655,7 +655,7 @@ implicit none
   subroutine set_primvar_reac_ids(this)
 
   implicit none
-  class(resombgc_index_type), intent(inout)  :: this
+  class(resom_bgc_index_type), intent(inout)  :: this
 
   integer :: reac
 
@@ -754,4 +754,4 @@ implicit none
 
   end subroutine set_primvar_reac_ids
 
-end module BgcresomIndexType
+end module resomBGCIndexType

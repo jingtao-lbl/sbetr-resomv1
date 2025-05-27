@@ -132,7 +132,7 @@ contains
   use cdomPlantSoilBGCType  , only : cdom_plant_soilbgc_type
   use simicPlantSoilBGCType , only : simic_plant_soilbgc_type
   use kecaPlantSoilBGCType  , only : keca_plant_soilbgc_type
-  use resomPlantSoilBGCType , only : resom_plant_soilbgc_type  !Jing Tao - still used old conventional name, but keep it right now.
+  use PlantSoilresomBGCType , only : resom_plant_soilbgc_type  !Jing Tao - still used old conventional name, but keep it right now.
 !#endif
   use v1ecaPlantSoilBGCType, only : v1eca_plant_soilbgc_type
   !end_appadd

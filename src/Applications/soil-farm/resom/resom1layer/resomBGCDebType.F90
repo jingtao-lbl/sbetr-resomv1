@@ -1,4 +1,4 @@
-module BgcresomDebType
+module resomBGCDebType
   !DESCRIPTION
 !module defines the data type for microbial growth
   use bshr_kind_mod       , only : r8 => shr_kind_r8
@@ -26,6 +26,6 @@ module BgcresomDebType
     real(r8), pointer :: pE    => null()
   end type debs
 
-end module BgcresomDebType
+end module resomBGCDebType
 
 

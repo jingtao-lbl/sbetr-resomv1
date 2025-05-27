@@ -1,4 +1,4 @@
-module BgcresomDecompType
+module resomBGCDecompType
 
 !
 ! DESCRIPTIONS
@@ -68,10 +68,10 @@ implicit none
  !------------------------------------------------------------------------
  subroutine Init(this, biogeo_con)
 
-  use resomParaType, only : resomPara_type
+  use resomParaType, only : resom_para_type
   implicit none
   class(Decompresom_type), intent(inout) :: this
-  type(resomPara_type),intent(in) :: biogeo_con
+  type(resom_para_type),intent(in) :: biogeo_con
 
   call this%InitAllocate ()
 
@@ -114,10 +114,10 @@ implicit none
   !-----------------------------------------------------------------------
   subroutine UpdateParas(this, biogeo_con)
 
-  use resomParaType, only : resomPara_type
+  use resomParaType, only : resom_para_type
   implicit none
   class(Decompresom_type) , intent(inout) :: this
-  type(resomPara_type)   , intent(in) :: biogeo_con
+  type(resom_para_type)   , intent(in) :: biogeo_con
 
   ! set "Q10" parameter
   this%Q10 = biogeo_con%Q10
@@ -155,7 +155,7 @@ implicit none
 
   use JarBgcForcType , only : JarBGC_forc_type
   use bshr_const_mod     , only : SHR_CONST_TKFRZ
-  use BgcresomMath     , only : interp1
+  use resomBGCMath     , only : interp1
   use betr_constants           , only : stdout
   !use InterpolationMod , only : mono_Linear_interp
   implicit none
@@ -332,6 +332,6 @@ implicit none
 
   end function catanf
 
-end module BgcresomDecompType
+end module resomBGCDecompType
 
   

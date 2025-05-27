@@ -1,6 +1,7 @@
-module BgcReactionsresomType
+module resomBGCReactionsType
 
 #include "bshr_assert.h"
+#include "bshr_assign.h"
 
   !
   ! !DESCRIPTION:
@@ -42,12 +43,12 @@ module BgcReactionsresomType
   use BGCReactionsMod       , only : bgc_reaction_type
   use betr_varcon           , only : spval => bspval, ispval => bispval
   use tracer_varcon         , only : bndcond_as_conc, bndcond_as_flux
-  use BgcresomType          , only : resombgceca_type
+  use resomBGCType          , only : resom_bgc_type
   use JarBgcForcType        , only : JarBGC_forc_type
   use BetrStatusType        , only : betr_status_type
-  use BgcresomIndexType     , only : resombgc_index_type
+  use resomBGCIndexType     , only : resom_bgc_index_type
   use resomParaType         , only : resom_para
-  use BgcresomSOMType       , only : resomSom_type                    !add to pass on new affinity parameter for mono uptake      -zlyu
+  use resomBGCSOMType       , only : resomSom_type                    !add to pass on new affinity parameter for mono uptake      -zlyu
   implicit none
 
   save
@@ -60,12 +61,12 @@ module BgcReactionsresomType
   logical :: ldebug
   !integer, private :: lpr
   type, public, extends(bgc_reaction_type) :: &
-    bgc_reaction_resom_type
+    resom_bgc_reaction_type
      private
-    type(resombgceca_type), pointer :: resomeca(:,:)
+     integer :: parcol
+    type(resom_bgc_type), pointer :: resomeca(:,:)
     type(JarBGC_forc_type), pointer :: resomforc(:,:)
-
-    type(resombgc_index_type) :: resombgc_index
+    type(resom_bgc_index_type) :: resom_bgc_index
     logical :: use_c13
     logical :: use_c14
     logical :: use_warm
@@ -96,27 +97,28 @@ module BgcReactionsresomType
     procedure :: set_bgc_spinup
     procedure :: UpdateParas
     procedure :: init_iP_prof
+    procedure :: SetParCols
     procedure, private :: set_resom_forc
     procedure, private :: retrieve_output
     procedure, private :: rm_ext_output
     procedure, private :: precision_filter
-  end type bgc_reaction_resom_type
+  end type resom_bgc_reaction_type
 
-  interface bgc_reaction_resom_type
+  interface resom_bgc_reaction_type
      module procedure constructor
-  end interface bgc_reaction_resom_type
+  end interface resom_bgc_reaction_type
 
 contains
 
 
   !-------------------------------------------------------------------------------
-  type(bgc_reaction_resom_type) function constructor()
+  type(resom_bgc_reaction_type) function constructor()
     !
     ! ! DESCRIPTION:
     !
-    ! create an object of type bgc_reaction_resom_type.
+    ! create an object of type resom_bgc_reaction_type.
     ! Right now it is purposely empty
-   type(bgc_reaction_resom_type), allocatable :: bgc
+   type(resom_bgc_reaction_type), allocatable :: bgc
 
    allocate(bgc)
    constructor = bgc
@@ -125,7 +127,7 @@ contains
   !-------------------------------------------------------------------------------
   subroutine UpdateParas(this, bounds, lbj, ubj, bstatus)
   implicit none
-  class(bgc_reaction_resom_type)       , intent(inout) :: this
+  class(resom_bgc_reaction_type)       , intent(inout) :: this
   type(bounds_type)                    , intent(in)    :: bounds
   integer                              , intent(in)    :: lbj, ubj        ! lower and upper bounds, make sure they are > 0
   type(betr_status_type)               , intent(out)   :: bstatus
@@ -149,7 +151,7 @@ contains
     use BeTRTracerType              , only : betrtracer_type
 
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type)  , intent(inout) :: this
+    class(resom_bgc_reaction_type)  , intent(inout) :: this
     type(bounds_type)               , intent(in) :: bounds
     type(BeTRtracer_type )          ,  intent(in) :: betrtracer_vars
     type(tracerboundarycond_type)   ,  intent(in) :: tracerboundarycond_vars
@@ -186,7 +188,7 @@ contains
   use tracer_varcon          , only : patomw
   use betr_constants           , only : stdout               ! add -zlyu
   implicit none
-  class(bgc_reaction_resom_type)    , intent(inout)    :: this      !
+  class(resom_bgc_reaction_type)    , intent(inout)    :: this      !
   type(bounds_type)                       , intent(in) :: bounds
   integer                                 , intent(in) :: lbj, ubj
   type(betr_biogeophys_input_type)        , intent(inout) :: biophysforc
@@ -201,12 +203,12 @@ contains
    tracer_conc_solid_equil_col => tracerstate_vars%tracer_conc_solid_equil_col, &
    scalaravg_col           => biophysforc%scalaravg_col              , &
    dom_scalar              => biophysforc%dom_scalar_col             , &
-   nelm                    => this%resombgc_index%nelms            , &
-   c_loc                   => this%resombgc_index%c_loc            , &
-   n_loc                   => this%resombgc_index%n_loc            , &
-   p_loc                   => this%resombgc_index%p_loc            , &
-   c13_loc                 => this%resombgc_index%c13_loc          , &
-   c14_loc                 => this%resombgc_index%c14_loc          , &
+   nelm                    => this%resom_bgc_index%nelms            , &
+   c_loc                   => this%resom_bgc_index%c_loc            , &
+   n_loc                   => this%resom_bgc_index%n_loc            , &
+   p_loc                   => this%resom_bgc_index%p_loc            , &
+   c13_loc                 => this%resom_bgc_index%c13_loc          , &
+   c14_loc                 => this%resom_bgc_index%c14_loc          , &
    move_scalar             => tracers%move_scalar                    &
   )
 
@@ -305,11 +307,11 @@ if(exit_spinup)then
 
     integer :: kk
     associate(                                                 &
-      c_loc        => this%resombgc_index%c_loc            , &
-      n_loc        => this%resombgc_index%n_loc            , &
-      p_loc        => this%resombgc_index%p_loc            , &
-      c13_loc      => this%resombgc_index%c13_loc          , &
-      c14_loc      => this%resombgc_index%c14_loc            &
+      c_loc        => this%resom_bgc_index%c_loc            , &
+      n_loc        => this%resom_bgc_index%n_loc            , &
+      p_loc        => this%resom_bgc_index%p_loc            , &
+      c13_loc      => this%resom_bgc_index%c13_loc          , &
+      c14_loc      => this%resom_bgc_index%c14_loc            &
     )
 
 
@@ -352,7 +354,7 @@ if(exit_spinup)then
   use tracerstatetype                  , only : tracerstate_type
   implicit none
   ! !ARGUMENTS:
-  class(bgc_reaction_resom_type)  , intent(inout)    :: this
+  class(resom_bgc_reaction_type)  , intent(inout)    :: this
   type(bounds_type)                        , intent(in) :: bounds
   integer                                  , intent(in) :: lbj, ubj
   type(betr_biogeophys_input_type)        , intent(inout) :: biophysforc
@@ -383,7 +385,7 @@ if(exit_spinup)then
   use BeTRTracerType           , only : betrtracer_type             ! added
 
   ! !ARGUMENTS:
-  class(bgc_reaction_resom_type), intent(inout)    :: this                       !
+  class(resom_bgc_reaction_type), intent(inout)    :: this                       !
   class(PlantNutKinetics_type), intent(in) :: plantNutkinetics
   type(betrtracer_type)       , intent(in) :: tracers               ! added
   type(tracercoeff_type), intent(inout) :: tracercoeff_vars         ! added
@@ -449,7 +451,7 @@ if(exit_spinup)then
     use betr_constants                   , only : stdout                              ! added!
     implicit none
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type)       , intent(inout) :: this
+    class(resom_bgc_reaction_type)       , intent(inout) :: this
     type(bounds_type)                    , intent(in)    :: bounds
     integer                              , intent(in)    :: lbj, ubj        ! lower and upper bounds, make sure they are > 0
     !type(BeTRtracer_type )               , intent(inout) :: betrtracer_vars !
@@ -476,7 +478,7 @@ if(exit_spinup)then
 
     if (this%dummy_compiler_warning) continue
 
-    call this%resombgc_index%Init(resom_para%use_c13, resom_para%use_c14, &
+    call this%resom_bgc_index%Init(resom_para%use_c13, resom_para%use_c14, &
        resom_para%non_limit, resom_para%nop_limit, betr_maxpatch_pft, resom_para%use_warm)
 
     if(bstatus%check_status())return
@@ -493,7 +495,7 @@ if(exit_spinup)then
         call this%resomeca(c,j)%Init(resom_para, batch_mode, bstatus)         !batch_mode added, corresponds to resom1layer
         if(bstatus%check_status())return
 
-        call this%resomforc(c,j)%Init(this%resombgc_index%nstvars)
+        call this%resomforc(c,j)%Init(this%resom_bgc_index%nstvars)
       enddo
     enddo
     this%use_c13 = resom_para%use_c13
@@ -503,12 +505,12 @@ if(exit_spinup)then
     this%use_warm =resom_para%use_warm
 
     !set up betr
-    nelm =this%resombgc_index%nelms
-    c_loc=this%resombgc_index%c_loc
-    n_loc=this%resombgc_index%n_loc
-    p_loc=this%resombgc_index%p_loc
-    c13_loc=this%resombgc_index%c13_loc
-    c14_loc=this%resombgc_index%c14_loc
+    nelm =this%resom_bgc_index%nelms
+    c_loc=this%resom_bgc_index%c_loc
+    n_loc=this%resom_bgc_index%n_loc
+    p_loc=this%resom_bgc_index%p_loc
+    c13_loc=this%resom_bgc_index%c13_loc
+    c14_loc=this%resom_bgc_index%c14_loc
     !volatile tracers
     itemp = 0; itemp_trc=0
 
@@ -1203,9 +1205,9 @@ if(exit_spinup)then
   end subroutine Init_betrbgc
 
   !-------------------------------------------------------------------------------
-  subroutine set_boundary_conditions(this, bounds, num_soilc, filter_soilc, dz_top, betrtracer_vars, &
-       biophysforc, biogeo_flux, tracercoeff_vars, tracerboundarycond_vars, betr_status)       
-    ! add tracercoeff_vars from /ecacnp/ecacnpNlayer/ecacnpBGCReactionsType.F90
+  subroutine set_boundary_conditions(this, bounds, num_soilc, filter_soilc, jtops, dz_top, betr_time, &
+       betrtracer_vars, biophysforc, biogeo_flux, tracercoeff_vars, tracerboundarycond_vars, betr_status)
+       
     !     
     ! !DESCRIPTION:
     ! set up boundary conditions for tracer movement
@@ -1216,15 +1218,18 @@ if(exit_spinup)then
     use BeTR_biogeoFluxType   , only : betr_biogeo_flux_type
     use BetrStatusType        , only : betr_status_type
     use BeTR_biogeophysInputType , only : betr_biogeophys_input_type
-    use TracerCoeffType        , only : tracercoeff_type                 ! added from /ecacnpNlayer/ecacnpBGCReactionsType.F90
+    use TracerCoeffType        , only : tracercoeff_type
+    use BeTR_TimeMod           , only : betr_time_type
     implicit none
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type)       , intent(inout)    :: this
+    class(resom_bgc_reaction_type)       , intent(inout)    :: this
     type(bounds_type)                    , intent(in)    :: bounds
     integer                              , intent(in)    :: num_soilc               ! number of columns in column filter
     integer                              , intent(in)    :: filter_soilc(:)         ! column filter
     type(betrtracer_type)                , intent(in)    :: betrtracer_vars
     real(r8)                             , intent(in)    :: dz_top(bounds%begc: )
+    integer                              , intent(in)    :: jtops(bounds%begc: )
+    type(betr_time_type)                 , intent(in)    :: betr_time
     type(betr_biogeophys_input_type)     , intent(in)    :: biophysforc
     type(betr_biogeo_flux_type)          , intent(in)    :: biogeo_flux
     type(tracercoeff_type)               , intent(in)   :: tracercoeff_vars         !add from /ecacnp/ecacnpNlayer/ecacnpBGCReactionsType.F90
@@ -1282,12 +1287,11 @@ if(exit_spinup)then
     end associate
   end subroutine set_boundary_conditions
   !-------------------------------------------------------------------------------
-
+       
   subroutine calc_bgc_reaction(this, bounds, col, lbj, ubj, num_soilc, filter_soilc, &
-       num_soilp,filter_soilp, jtops, dtime, betrtracer_vars, tracercoeff_vars, biophysforc,    &
+       num_soilp,filter_soilp, jtops, betr_time, betrtracer_vars, tracercoeff_vars, biophysforc,    &
        tracerstate_vars, tracerflux_vars, tracerboundarycond_vars, plant_soilbgc, &
-       biogeo_flux,  betr_status)                    !add record      -zlyu
-
+       biogeo_flux, biogeo_state, betr_status)
     !
     ! !DESCRIPTION:
     ! do bgc reaction
@@ -1308,13 +1312,13 @@ if(exit_spinup)then
     use betr_columnType          , only : betr_column_type
     use BeTR_biogeoFluxType      , only : betr_biogeo_flux_type
     use BeTR_biogeoStateType     , only : betr_biogeo_state_type
-    use PlantSoilBgcresomType    , only : plant_soilbgc_resom_type
+    use resomPlantSoilBGCType    , only : resom_plant_soilbgc_type
     use betr_ctrl                , only : betr_spinup_state
-    use betr_constants           , only : stdout                              ! added       !-zlyu
-    !use BeTR_TimeMod             , only : betr_time_type                      !-zlyu     added
+    use betr_constants           , only : stdout
+    use BeTR_TimeMod             , only : betr_time_type
     implicit none
     ! !ARGUMENTS
-    class(bgc_reaction_resom_type)       , intent(inout) :: this
+    class(resom_bgc_reaction_type)       , intent(inout) :: this
     type(bounds_type)                    , intent(in) :: bounds                        ! bounds
     type(betr_column_type)               , intent(in) :: col
     integer                              , intent(in) :: num_soilc                     ! number of columns in column filter
@@ -1323,7 +1327,7 @@ if(exit_spinup)then
     integer                              , intent(in) :: filter_soilp(:)               ! pft filter
     integer                              , intent(in) :: jtops(bounds%begc: )          ! top index of each column
     integer                              , intent(in) :: lbj, ubj                      ! lower and upper bounds, make sure they are > 0
-    real(r8)                             , intent(in) :: dtime                         ! model time step
+    type(betr_time_type)                 , intent(in) :: betr_time                     ! model time step
     type(betrtracer_type)                , intent(in) :: betrtracer_vars               ! betr configuration information
     type(tracercoeff_type)               , intent(inout) :: tracercoeff_vars           ! change in to inout
     type(betr_biogeophys_input_type)     , intent(inout) :: biophysforc
@@ -1332,6 +1336,7 @@ if(exit_spinup)then
     type(tracerflux_type)                , intent(inout) :: tracerflux_vars
     class(plant_soilbgc_type)            , intent(inout) :: plant_soilbgc
     type(betr_biogeo_flux_type)          , intent(inout) :: biogeo_flux
+    type(betr_biogeo_state_type)         , intent(inout) :: biogeo_state
     type(betr_status_type)               , intent(out)   :: betr_status
 
     ! !LOCAL VARIABLES:
@@ -1353,7 +1358,7 @@ if(exit_spinup)then
     if(betrtracer_vars%debug)call this%debug_info(bounds, num_soilc, filter_soilc, col%dz(bounds%begc:bounds%endc,bounds%lbj:bounds%ubj),&
          betrtracer_vars, tracerstate_vars,  'before bgcreact', betr_status)
 
-    nstates = this%resombgc_index%nstvars
+    nstates = this%resom_bgc_index%nstvars
     allocate(ystates0(nstates))
     allocate(ystatesf(nstates))
 
@@ -1362,7 +1367,7 @@ if(exit_spinup)then
         biophysforc, plant_soilbgc, betrtracer_vars, tracercoeff_vars, tracerstate_vars,betr_status)
     
     select type(plant_soilbgc)
-    type is(plant_soilbgc_resom_type)
+    type is(resom_plant_soilbgc_type)
       plant_soilbgc%plant_minn_active_yield_flx_col(:) = 0._r8
       plant_soilbgc%plant_minp_active_yield_flx_col(:) = 0._r8
    end select
@@ -1377,7 +1382,7 @@ if(exit_spinup)then
         this%resomeca(c,j)%bgc_on=.not. betrtracer_vars%debug
 
         if(this%resomforc(c,j)%debug)print*,'runbgc',j
-        call this%resomeca(c,j)%runbgc(is_surflit, dtime, this%resomforc(c,j), nstates, &             !this, passing on this current bgc_reaction_resom_type       -zlyu
+        call this%resomeca(c,j)%runbgc(is_surflit, betr_time%delta_time, this%resomforc(c,j), nstates, &             !this, passing on this current resom_bgc_reaction_type       -zlyu
              ystates0, ystatesf, betr_status)
 
         if(betr_status%check_status())then
@@ -1387,17 +1392,17 @@ if(exit_spinup)then
         endif        
           !if(.not. betrtracer_vars%debug)then
           !apply loss through fire,
-          call this%rm_ext_output(c, j, dtime, nstates, ystatesf, this%resombgc_index,&
+          call this%rm_ext_output(c, j, betr_time%delta_time, nstates, ystatesf, this%resom_bgc_index,&
                this%resomforc(c,j), biogeo_flux)
           !endif
         call this%precision_filter(nstates, ystatesf)
-        this%resombgc_index%debug=betrtracer_vars%debug
+        this%resom_bgc_index%debug=betrtracer_vars%debug
 
-        call this%retrieve_output(c, j, nstates, ystates0, ystatesf, dtime, betrtracer_vars, tracerflux_vars,&
+        call this%retrieve_output(c, j, nstates, ystates0, ystatesf, betr_time%delta_time, betrtracer_vars, tracerflux_vars,&
              tracerstate_vars, plant_soilbgc, biogeo_flux)
 
         select type(plant_soilbgc)
-        type is(plant_soilbgc_resom_type)
+        type is(resom_plant_soilbgc_type)
           plant_soilbgc%plant_minn_active_yield_flx_col(c)=plant_soilbgc%plant_minn_active_yield_flx_col(c) + &
              (plant_soilbgc%plant_minn_no3_active_yield_flx_vr_col(c,j) + &
               plant_soilbgc%plant_minn_nh4_active_yield_flx_vr_col(c,j))*col%dz(c,j)
@@ -1414,7 +1419,7 @@ if(exit_spinup)then
     
      if(betrtracer_vars%debug)then
        select type(plant_soilbgc)
-       type is(plant_soilbgc_resom_type)
+       type is(resom_plant_soilbgc_type)
        write(*,*)'sminn act plant uptake',plant_soilbgc%plant_minn_active_yield_flx_col(bounds%begc:bounds%endc)
        write(*,*)'sminp act plant uptake',plant_soilbgc%plant_minp_active_yield_flx_col(bounds%begc:bounds%endc)
       end select
@@ -1426,22 +1431,22 @@ if(exit_spinup)then
   end subroutine calc_bgc_reaction
 
   !--------------------------------------------------------------------
-  subroutine rm_ext_output(this, c, j, dtime, nstates, ystatesf, resombgc_index, resom_forc, biogeo_flux)
+  subroutine rm_ext_output(this, c, j, dtime, nstates, ystatesf, resom_bgc_index, resom_forc, biogeo_flux)
   !
   ! DESCRIPTION
   ! apply om loss through fire
 
-  use BgcresomIndexType       , only : resombgc_index_type
+  use resomBGCIndexType       , only : resom_bgc_index_type
   use JarBgcForcType            , only : JarBGC_forc_type
   use tracer_varcon             , only : catomw, natomw, patomw, c13atomw, c14atomw
   use BeTR_biogeoFluxType       , only : betr_biogeo_flux_type
   implicit none
-  class(bgc_reaction_resom_type) , intent(inout) :: this
+  class(resom_bgc_reaction_type) , intent(inout) :: this
   integer                     , intent(in) :: c, j
   real(r8)                    , intent(in) :: dtime
   integer                     , intent(in) :: nstates
   real(r8)                    , intent(inout):: ystatesf(1:nstates)
-  type(resombgc_index_type)   , intent(in) :: resombgc_index
+  type(resom_bgc_index_type)   , intent(in) :: resom_bgc_index
   type(JarBGC_forc_type)      , intent(in) :: resom_forc
   type(betr_biogeo_flux_type) , intent(inout) :: biogeo_flux
   integer :: kc, kn, kp, jj, kc13, kc14
@@ -1450,23 +1455,23 @@ if(exit_spinup)then
 
   integer :: loc_indx(3)
   associate(                         &
-    lit1 =>  resombgc_index%lit1 , &
-    lit2 =>  resombgc_index%lit2 , &
-    lit3 =>  resombgc_index%lit3 , &
-    cwd =>  resombgc_index%cwd   , &
-    lwd =>  resombgc_index%lwd   , &
-    fwd =>  resombgc_index%fwd   , &
-    c13_loc=>  resombgc_index%c13_loc,&
-    c14_loc=>  resombgc_index%c14_loc,&
-    c_loc=>  resombgc_index%c_loc,&
-    n_loc=>  resombgc_index%n_loc,&
-    p_loc=>  resombgc_index%p_loc,&
-    mic =>  resombgc_index%mic , &
-    res =>  resombgc_index%res , &
-    enz =>  resombgc_index%enz , &
-    mono =>  resombgc_index%mono , &
-    poly =>  resombgc_index%poly , &
-    nelms => resombgc_index%nelms, &
+    lit1 =>  resom_bgc_index%lit1 , &
+    lit2 =>  resom_bgc_index%lit2 , &
+    lit3 =>  resom_bgc_index%lit3 , &
+    cwd =>  resom_bgc_index%cwd   , &
+    lwd =>  resom_bgc_index%lwd   , &
+    fwd =>  resom_bgc_index%fwd   , &
+    c13_loc=>  resom_bgc_index%c13_loc,&
+    c14_loc=>  resom_bgc_index%c14_loc,&
+    c_loc=>  resom_bgc_index%c_loc,&
+    n_loc=>  resom_bgc_index%n_loc,&
+    p_loc=>  resom_bgc_index%p_loc,&
+    mic =>  resom_bgc_index%mic , &
+    res =>  resom_bgc_index%res , &
+    enz =>  resom_bgc_index%enz , &
+    mono =>  resom_bgc_index%mono , &
+    poly =>  resom_bgc_index%poly , &
+    nelms => resom_bgc_index%nelms, &
     frac_loss_lit_to_fire => resom_forc%frac_loss_lit_to_fire, &
     frac_loss_cwd_to_fire => resom_forc%frac_loss_cwd_to_fire, &
     fire_decomp_c12loss_vr_col => biogeo_flux%c12flux_vars%fire_decomp_closs_vr_col, &
@@ -1561,7 +1566,7 @@ if(exit_spinup)then
     use BeTRTracerType        , only : betrtracer_type
     use BetrStatusType        , only : betr_status_type
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type), intent(inout)    :: this
+    class(resom_bgc_reaction_type), intent(inout)    :: this
     type(bounds_type),                    intent(in)    :: bounds
     integer,                              intent(in)    :: lbj, ubj
     integer,                              intent(in)    :: jtops(bounds%begc: )        ! top label of each column
@@ -1590,7 +1595,7 @@ if(exit_spinup)then
     use BeTRTracerType   , only : BeTRTracer_Type
 
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type) , intent(inout)    :: this
+    class(resom_bgc_reaction_type) , intent(inout)    :: this
     character(len=*)                  , intent(in)  :: namelist_buffer
     type(BeTRTracer_Type)                , intent(inout) :: betrtracer_vars
 
@@ -1617,7 +1622,7 @@ if(exit_spinup)then
     use betr_constants           , only : stdout              ! addd   -zlyu
     implicit none
     ! !ARGUMENTS:
-    class(bgc_reaction_resom_type)   , intent(inout)    :: this
+    class(resom_bgc_reaction_type)   , intent(inout)    :: this
     type(betr_bounds_type)           , intent(in)    :: bounds
     type(betr_column_type)           , intent(in)    :: col
     type(BeTRTracer_Type)            , intent(in)    :: betrtracer_vars
@@ -1640,10 +1645,10 @@ if(exit_spinup)then
     !-----------------------------------------------------------------------
 
     associate(                                    &
-        nelm    => this%resombgc_index%nelms     , &
-        c_loc   => this%resombgc_index%c_loc     , &
-        n_loc   => this%resombgc_index%n_loc     , &
-        p_loc   => this%resombgc_index%p_loc     , &
+        nelm    => this%resom_bgc_index%nelms     , &
+        c_loc   => this%resom_bgc_index%c_loc     , &
+        n_loc   => this%resom_bgc_index%n_loc     , &
+        p_loc   => this%resom_bgc_index%p_loc     , &
         id_trc_beg_Bm=> betrtracer_vars%id_trc_beg_Bm, &
         id_trc_end_Bm=> betrtracer_vars%id_trc_end_Bm, &
          volatileid => betrtracer_vars%volatileid &
@@ -1694,7 +1699,7 @@ if(exit_spinup)then
   use tracer_varcon            , only : natomw, patomw, catomw
   use betr_constants           , only : stdout                        !-zlyu
   implicit none
-  class(bgc_reaction_resom_type)   , intent(inout)    :: this !!
+  class(resom_bgc_reaction_type)   , intent(inout)    :: this !!
   integer                          , intent(in)    :: num_soilc                   ! number of columns in column filter
   integer                          , intent(in)    :: filter_soilc(:)             ! column filter
   type(betrtracer_type)            , intent(in)    :: betrtracer_vars             ! betr configuration information
@@ -1715,9 +1720,9 @@ if(exit_spinup)then
       id_trc_p_sol            => betrtracer_vars%id_trc_p_sol  &
    )
 
-    c_loc=this%resombgc_index%c_loc
-    n_loc=this%resombgc_index%n_loc
-    p_loc=this%resombgc_index%p_loc
+    c_loc=this%resom_bgc_index%c_loc
+    n_loc=this%resom_bgc_index%n_loc
+    p_loc=this%resom_bgc_index%p_loc
 
    !retrieve tracer losses through surface and subsurface runoffs
    !no3 leach, no3 runoff
@@ -1779,12 +1784,12 @@ if(exit_spinup)then
   use tracercoeffType          , only : tracercoeff_type
   use betr_columnType          , only : betr_column_type
   use BetrTracerType           , only : betrtracer_type
-  use PlantSoilBgcresomType      , only : plant_soilbgc_resom_type
+  use resomPlantSoilBGCType      , only : resom_plant_soilbgc_type
   use MathfuncMod              , only : fpmax
   use betr_varcon              , only : grav => bgrav
   use betr_constants           , only : stdout                        !-zlyu
   implicit none
-  class(bgc_reaction_resom_type)       , intent(inout)    :: this
+  class(resom_bgc_reaction_type)       , intent(inout)    :: this
   type(bounds_type)                    , intent(in) :: bounds                         ! bounds
   type(betr_column_type)               , intent(in) :: col
   integer                              , intent(in) :: jtops(bounds%begc: ) ! top index of each column
@@ -1837,16 +1842,16 @@ if(exit_spinup)then
   real(r8) :: psi, minpsi, maxpsi                !soil matric potential
   
   associate( &
-     litr_beg =>  this%resombgc_index%litr_beg  , &
-     litr_end =>  this%resombgc_index%litr_end  , &
-     wood_beg =>  this%resombgc_index%wood_beg  , &
-     wood_end =>  this%resombgc_index%wood_end  , &
-     som_beg =>  this%resombgc_index%som_beg    , &
-     som_end =>  this%resombgc_index%som_end    , &
-     dom_beg =>  this%resombgc_index%dom_beg    , &
-     dom_end =>  this%resombgc_index%dom_end    , &
-     Bm_beg  =>  this%resombgc_index%Bm_beg     , &
-     Bm_end  =>  this%resombgc_index%Bm_end       &
+     litr_beg =>  this%resom_bgc_index%litr_beg  , &
+     litr_end =>  this%resom_bgc_index%litr_end  , &
+     wood_beg =>  this%resom_bgc_index%wood_beg  , &
+     wood_end =>  this%resom_bgc_index%wood_end  , &
+     som_beg =>  this%resom_bgc_index%som_beg    , &
+     som_end =>  this%resom_bgc_index%som_end    , &
+     dom_beg =>  this%resom_bgc_index%dom_beg    , &
+     dom_end =>  this%resom_bgc_index%dom_end    , &
+     Bm_beg  =>  this%resom_bgc_index%Bm_beg     , &
+     Bm_end  =>  this%resom_bgc_index%Bm_end       &
   )
   call betr_status%reset()
   SHR_ASSERT_ALL((ubound(jtops) == (/bounds%endc/)), errMsg(mod_filename,__LINE__),betr_status)
@@ -1882,46 +1887,46 @@ if(exit_spinup)then
       !if(this%resomforc(c,j)%ystates(Bm_beg)<=tiny_cval)this%resomforc(c,j)%ystates(Bm_beg:Bm_end)=0._r8
       
       !non-soluble phase of mineral p
-      k1= betrtracer_vars%id_trc_beg_minp; k2 = this%resombgc_index%lid_minp_secondary
+      k1= betrtracer_vars%id_trc_beg_minp; k2 = this%resom_bgc_index%lid_minp_secondary
       this%resomforc(c,j)%ystates(k2) = fpmax(tracerstate_vars%tracer_conc_mobile_col(c,j,k1))
 
-      k1 = betrtracer_vars%id_trc_end_minp;   k2 = this%resombgc_index%lid_minp_occlude
+      k1 = betrtracer_vars%id_trc_end_minp;   k2 = this%resom_bgc_index%lid_minp_occlude
       this%resomforc(c,j)%ystates(k2) = fpmax(tracerstate_vars%tracer_conc_mobile_col(c,j,k1))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_n2) = &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_n2) = &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_n2))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_o2) = &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_o2) = &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_o2))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_ar) = &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_ar) = &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_ar))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_co2)= &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_co2)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_co2x))
 
       if(this%use_c13)then
-        this%resomforc(c,j)%ystates(this%resombgc_index%lid_c13_co2)= &
+        this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_c13_co2)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_c13_co2x))
       endif
       if(this%use_c14)then
-        this%resomforc(c,j)%ystates(this%resombgc_index%lid_c14_co2)= &
+        this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_c14_co2)= &
           fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_c14_co2x))
       endif
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_ch4)= &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_ch4)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_ch4))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_nh4)= &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_nh4)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_nh3x))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_no3)= &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_no3)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_no3x))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_n2o)= &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_n2o)= &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_n2o))
 
-      this%resomforc(c,j)%ystates(this%resombgc_index%lid_minp_soluble) = &
+      this%resomforc(c,j)%ystates(this%resom_bgc_index%lid_minp_soluble) = &
            fpmax(tracerstate_vars%tracer_conc_mobile_col(c,j,betrtracer_vars%id_trc_p_sol))
 
       !input
@@ -2125,7 +2130,7 @@ if(exit_spinup)then
   ! the P amount may be larger than N amount, causing the code to crash.
   ! This fix set C, N and P to zero when C is below a threshold.
   implicit none
-  class(bgc_reaction_resom_type)       , intent(inout)    :: this
+  class(resom_bgc_reaction_type)       , intent(inout)    :: this
   integer                              , intent(in) :: nstates
   real(r8)                             , intent(inout) :: ystatesf(nstates)
 
@@ -2133,16 +2138,16 @@ if(exit_spinup)then
   integer :: jj
   integer :: kc, kn, kp, kc13, kc14
   associate(                              &
-    nelms   => this%resombgc_index%nelms, &
-    c_loc   => this%resombgc_index%c_loc, &
-    n_loc   => this%resombgc_index%n_loc, &
-    p_loc   => this%resombgc_index%p_loc, &
-    c13_loc => this%resombgc_index%c13_loc, &
-    c14_loc => this%resombgc_index%c14_loc, &
-    lit2    => this%resombgc_index%lit2 , &
-    lit3    => this%resombgc_index%lit3 , &
-    nresompools => this%resombgc_index%nom_pools, &
-    is_sumpool_som => this%resombgc_index%is_sumpool_som &
+    nelms   => this%resom_bgc_index%nelms, &
+    c_loc   => this%resom_bgc_index%c_loc, &
+    n_loc   => this%resom_bgc_index%n_loc, &
+    p_loc   => this%resom_bgc_index%p_loc, &
+    c13_loc => this%resom_bgc_index%c13_loc, &
+    c14_loc => this%resom_bgc_index%c14_loc, &
+    lit2    => this%resom_bgc_index%lit2 , &
+    lit3    => this%resom_bgc_index%lit3 , &
+    nresompools => this%resom_bgc_index%nom_pools, &
+    is_sumpool_som => this%resom_bgc_index%is_sumpool_som &
   )
   do jj = 1, nresompools
     kc = (jj-1) * nelms + c_loc
@@ -2180,11 +2185,11 @@ if(exit_spinup)then
   use tracerstatetype          , only : tracerstate_type
   use betr_ctrl                , only : betr_spinup_state
   use PlantSoilBGCMod          , only : plant_soilbgc_type
-  use PlantSoilBgcresomType      , only : plant_soilbgc_resom_type
+  use resomPlantSoilBGCType      , only : resom_plant_soilbgc_type
   use tracer_varcon            , only : catomw, natomw, patomw, fix_ip
   use betr_constants      , only : stdout                                        !-zlyu 
   implicit none
-  class(bgc_reaction_resom_type) , intent(inout)    :: this
+  class(resom_bgc_reaction_type) , intent(inout)    :: this
   integer                              , intent(in) :: c, j
   integer                              , intent(in) :: nstates
   real(r8)                             , intent(in) :: ystates0(nstates)
@@ -2200,18 +2205,18 @@ if(exit_spinup)then
   integer :: trcid
 
   associate(                                                                &
-    nom_pools             => this%resombgc_index%nom_pools              , & !
-    nelms                 => this%resombgc_index%nelms                  , & !
-    litr_beg              => this%resombgc_index%litr_beg               , & !
-    litr_end              => this%resombgc_index%litr_end               , & !
-    wood_beg              => this%resombgc_index%wood_beg               , & !
-    wood_end              => this%resombgc_index%wood_end               , & !
-    som_beg               => this%resombgc_index%som_beg                , & !
-    som_end               => this%resombgc_index%som_end                , & !
-    dom_beg               => this%resombgc_index%dom_beg                , & !
-    dom_end               => this%resombgc_index%dom_end                , & !
-    Bm_beg                => this%resombgc_index%Bm_beg                 , & !
-    Bm_end                => this%resombgc_index%Bm_end                 , & !
+    nom_pools             => this%resom_bgc_index%nom_pools              , & !
+    nelms                 => this%resom_bgc_index%nelms                  , & !
+    litr_beg              => this%resom_bgc_index%litr_beg               , & !
+    litr_end              => this%resom_bgc_index%litr_end               , & !
+    wood_beg              => this%resom_bgc_index%wood_beg               , & !
+    wood_end              => this%resom_bgc_index%wood_end               , & !
+    som_beg               => this%resom_bgc_index%som_beg                , & !
+    som_end               => this%resom_bgc_index%som_end                , & !
+    dom_beg               => this%resom_bgc_index%dom_beg                , & !
+    dom_end               => this%resom_bgc_index%dom_end                , & !
+    Bm_beg                => this%resom_bgc_index%Bm_beg                 , & !
+    Bm_end                => this%resom_bgc_index%Bm_end                 , & !
     volatileid            => betrtracer_vars%volatileid                   , &
     tracer_flx_netpro_vr  => tracerflux_vars%tracer_flx_netpro_vr_col     , & !
     tracer_flx_parchm_vr  => tracerflux_vars%tracer_flx_parchm_vr_col     , & !
@@ -2244,48 +2249,48 @@ if(exit_spinup)then
            ystatesf(dom_beg:dom_end)
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_n2) = &
-        ystatesf(this%resombgc_index%lid_n2)
+        ystatesf(this%resom_bgc_index%lid_n2)
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_o2) = &
-        ystatesf(this%resombgc_index%lid_o2)
+        ystatesf(this%resom_bgc_index%lid_o2)
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_ar) = &
-        ystatesf(this%resombgc_index%lid_ar)
+        ystatesf(this%resom_bgc_index%lid_ar)
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_co2x) = &
-        ystatesf(this%resombgc_index%lid_co2)
+        ystatesf(this%resom_bgc_index%lid_co2)
 
       if(this%use_c13)then
         tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_c13_co2x) = &
-          ystatesf(this%resombgc_index%lid_c13_co2)
+          ystatesf(this%resom_bgc_index%lid_c13_co2)
       endif
 
       if(this%use_c14)then
         tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_c14_co2x) = &
-          ystatesf(this%resombgc_index%lid_c14_co2)
+          ystatesf(this%resom_bgc_index%lid_c14_co2)
       endif
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_ch4) = &
-        ystatesf(this%resombgc_index%lid_ch4)
+        ystatesf(this%resom_bgc_index%lid_ch4)
 
       if(this%non_limit)then
 
-         if(ystatesf(this%resombgc_index%lid_nh4)>0._r8)then
+         if(ystatesf(this%resom_bgc_index%lid_nh4)>0._r8)then
           tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_nh3x) = &
-            ystatesf(this%resombgc_index%lid_nh4)
+            ystatesf(this%resom_bgc_index%lid_nh4)
 
           biogeo_flux%n14flux_vars%supplement_to_sminn_vr_col(c,j) = 0._r8
         else
           tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_nh3x) = 0._r8
 
           biogeo_flux%n14flux_vars%supplement_to_sminn_vr_col(c,j) = &
-              -ystatesf(this%resombgc_index%lid_nh4)*natomw/dtime
-          ystatesf(this%resombgc_index%lid_nh4)=0._r8
+              -ystatesf(this%resom_bgc_index%lid_nh4)*natomw/dtime
+          ystatesf(this%resom_bgc_index%lid_nh4)=0._r8
         endif
 
-         if(ystatesf(this%resombgc_index%lid_no3)>0._r8)then
+         if(ystatesf(this%resom_bgc_index%lid_no3)>0._r8)then
           tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_no3x) = &
-            ystatesf(this%resombgc_index%lid_no3)
+            ystatesf(this%resom_bgc_index%lid_no3)
 
         else
           tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_no3x) = 0._r8
@@ -2294,32 +2299,32 @@ if(exit_spinup)then
           !is problematic
           biogeo_flux%n14flux_vars%supplement_to_sminn_vr_col(c,j) =    &
              biogeo_flux%n14flux_vars%supplement_to_sminn_vr_col(c,j) - &
-             ystatesf(this%resombgc_index%lid_no3)*natomw/dtime
-          ystatesf(this%resombgc_index%lid_no3) = 0._r8
+             ystatesf(this%resom_bgc_index%lid_no3)*natomw/dtime
+          ystatesf(this%resom_bgc_index%lid_no3) = 0._r8
         endif
       else
         tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_nh3x) = &
-          ystatesf(this%resombgc_index%lid_nh4)
+          ystatesf(this%resom_bgc_index%lid_nh4)
 
         tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_no3x) = &
-          ystatesf(this%resombgc_index%lid_no3)
+          ystatesf(this%resom_bgc_index%lid_no3)
       endif
 
       tracerstate_vars%tracer_conc_mobile_col(c, j, betrtracer_vars%id_trc_n2o) = &
-        ystatesf(this%resombgc_index%lid_n2o)
+        ystatesf(this%resom_bgc_index%lid_n2o)
 
       if(.not. fix_ip)then
-        k1= betrtracer_vars%id_trc_beg_minp; k2 = this%resombgc_index%lid_minp_secondary
+        k1= betrtracer_vars%id_trc_beg_minp; k2 = this%resom_bgc_index%lid_minp_secondary
         tracerstate_vars%tracer_conc_mobile_col(c,j,k1) = ystatesf(k2)
 
-        k1 = betrtracer_vars%id_trc_end_minp;   k2 = this%resombgc_index%lid_minp_occlude
+        k1 = betrtracer_vars%id_trc_end_minp;   k2 = this%resom_bgc_index%lid_minp_occlude
         tracerstate_vars%tracer_conc_mobile_col(c,j,k1) = ystatesf(k2)
 
         if(this%nop_limit)then
 
-          if(ystatesf(this%resombgc_index%lid_minp_soluble)>0._r8)then
+          if(ystatesf(this%resom_bgc_index%lid_minp_soluble)>0._r8)then
             tracerstate_vars%tracer_conc_mobile_col(c,j,betrtracer_vars%id_trc_p_sol) = &
-              ystatesf(this%resombgc_index%lid_minp_soluble)
+              ystatesf(this%resom_bgc_index%lid_minp_soluble)
 
             !no P-limitation in this time step
             biogeo_flux%p31flux_vars%supplement_to_sminp_vr_col(c,j) = 0._r8
@@ -2328,148 +2333,148 @@ if(exit_spinup)then
             tracerstate_vars%tracer_conc_mobile_col(c,j,betrtracer_vars%id_trc_p_sol) =  0._r8
 
             biogeo_flux%p31flux_vars%supplement_to_sminp_vr_col(c,j) = 0._r8 &
-              -ystatesf(this%resombgc_index%lid_minp_soluble)*patomw/dtime
-            ystatesf(this%resombgc_index%lid_minp_soluble) = 0._r8
+              -ystatesf(this%resom_bgc_index%lid_minp_soluble)*patomw/dtime
+            ystatesf(this%resom_bgc_index%lid_minp_soluble) = 0._r8
           endif
         else
           tracerstate_vars%tracer_conc_mobile_col(c,j,betrtracer_vars%id_trc_p_sol) = &
-            ystatesf(this%resombgc_index%lid_minp_soluble)
+            ystatesf(this%resom_bgc_index%lid_minp_soluble)
         endif
         !fluxes
         tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_p_sol) =      &
-          ystatesf(this%resombgc_index%lid_minp_soluble) - &
-          ystates0(this%resombgc_index%lid_minp_soluble)
+          ystatesf(this%resom_bgc_index%lid_minp_soluble) - &
+          ystates0(this%resom_bgc_index%lid_minp_soluble)
 
         trcid = betrtracer_vars%id_trc_beg_minp
         tracer_flx_netpro_vr(c,j, trcid) = &
-          ystatesf(this%resombgc_index%lid_minp_secondary) - &
-          ystates0(this%resombgc_index%lid_minp_secondary)
+          ystatesf(this%resom_bgc_index%lid_minp_secondary) - &
+          ystates0(this%resom_bgc_index%lid_minp_secondary)
 
         trcid = betrtracer_vars%id_trc_end_minp
         tracer_flx_netpro_vr(c,j, trcid) =  &
-          ystatesf(this%resombgc_index%lid_minp_occlude) - &
-          ystates0(this%resombgc_index%lid_minp_occlude)
+          ystatesf(this%resom_bgc_index%lid_minp_occlude) - &
+          ystates0(this%resom_bgc_index%lid_minp_occlude)
       endif
-      !tracer fluxes
+      !tracer fluxes 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_nh3x) =  &
-        ystatesf(this%resombgc_index%lid_nh4) - &
-        ystates0(this%resombgc_index%lid_nh4)
+        ystatesf(this%resom_bgc_index%lid_nh4) - &
+        ystates0(this%resom_bgc_index%lid_nh4)
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_no3x)  =  &
-        ystatesf(this%resombgc_index%lid_no3) - &
-        ystates0(this%resombgc_index%lid_no3)
+        ystatesf(this%resom_bgc_index%lid_no3) - &
+        ystates0(this%resom_bgc_index%lid_no3)
 
       tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_o2) ) = &
-         ystatesf(this%resombgc_index%lid_o2_paere )  - &
-         ystates0(this%resombgc_index%lid_o2_paere)
+         ystatesf(this%resom_bgc_index%lid_o2_paere )  - &
+         ystates0(this%resom_bgc_index%lid_o2_paere)
 
-      !--------------------------------------
+      !----- Jing Tao turned on----------------------------------
       tracer_flx_decomp_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_decomp )  - &
-         ystates0(this%resombgc_index%lid_decomp)
+         ystatesf(this%resom_bgc_index%lid_decomp )  - &
+         ystates0(this%resom_bgc_index%lid_decomp)
 
       tracer_flx_uptake_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_uptake )  - &
-         ystates0(this%resombgc_index%lid_uptake)
+         ystatesf(this%resom_bgc_index%lid_uptake )  - &
+         ystates0(this%resom_bgc_index%lid_uptake)
 
       tracer_flx_cue_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_cue )  - &
-         ystates0(this%resombgc_index%lid_cue)
+         ystatesf(this%resom_bgc_index%lid_cue )  - &
+         ystates0(this%resom_bgc_index%lid_cue)
 
       tracer_flx_maint_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_maint )  - &
-         ystates0(this%resombgc_index%lid_maint)
+         ystatesf(this%resom_bgc_index%lid_maint )  - &
+         ystates0(this%resom_bgc_index%lid_maint)
 
       tracer_flx_kaffmm_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_kaffmm )  - &
-         ystates0(this%resombgc_index%lid_kaffmm)
+         ystatesf(this%resom_bgc_index%lid_kaffmm )  - &
+         ystates0(this%resom_bgc_index%lid_kaffmm)
 
       tracer_flx_kaffem_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_kaffem )  - &
-         ystates0(this%resombgc_index%lid_kaffem)
+         ystatesf(this%resom_bgc_index%lid_kaffem )  - &
+         ystates0(this%resom_bgc_index%lid_kaffem)
 
       tracer_flx_micgrow_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_micgrow )  - &
-         ystates0(this%resombgc_index%lid_micgrow)
+         ystatesf(this%resom_bgc_index%lid_micgrow )  - &
+         ystates0(this%resom_bgc_index%lid_micgrow)
 
       tracer_flx_enzprod_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_enzprod )  - &
-         ystates0(this%resombgc_index%lid_enzprod)
+         ystatesf(this%resom_bgc_index%lid_enzprod )  - &
+         ystates0(this%resom_bgc_index%lid_enzprod)
 
       tracer_flx_turnover_vr(c,j,1) = &
-         ystatesf(this%resombgc_index%lid_turnover )  - &
-         ystates0(this%resombgc_index%lid_turnover)
+         ystatesf(this%resom_bgc_index%lid_turnover )  - &
+         ystates0(this%resom_bgc_index%lid_turnover)
       !--------------------------------------
 
       if ( betr_spinup_state == 0 ) then
         tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_n2)  ) = &
-          ystatesf(this%resombgc_index%lid_n2_paere)  - &
-          ystates0(this%resombgc_index%lid_n2_paere)
+          ystatesf(this%resom_bgc_index%lid_n2_paere)  - &
+          ystates0(this%resom_bgc_index%lid_n2_paere)
 
         tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_ar)  ) = &
-          ystatesf(this%resombgc_index%lid_ar_paere)  - &
-          ystates0(this%resombgc_index%lid_ar_paere)
+          ystatesf(this%resom_bgc_index%lid_ar_paere)  - &
+          ystates0(this%resom_bgc_index%lid_ar_paere)
 
         tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_co2x)) = &
-          ystatesf(this%resombgc_index%lid_co2_paere)  - &
-          ystates0(this%resombgc_index%lid_co2_paere)
+          ystatesf(this%resom_bgc_index%lid_co2_paere)  - &
+          ystates0(this%resom_bgc_index%lid_co2_paere)
 
         if(this%use_c13)then
           tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_c13_co2x)) = &
-            ystatesf(this%resombgc_index%lid_c13_co2_paere)  - &
-            ystates0(this%resombgc_index%lid_c13_co2_paere)
+            ystatesf(this%resom_bgc_index%lid_c13_co2_paere)  - &
+            ystates0(this%resom_bgc_index%lid_c13_co2_paere)
         endif
 
         if(this%use_c14)then
           tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_c14_co2x)) = &
-            ystatesf(this%resombgc_index%lid_c14_co2_paere)  - &
-            ystates0(this%resombgc_index%lid_c14_co2_paere)
+            ystatesf(this%resom_bgc_index%lid_c14_co2_paere)  - &
+            ystates0(this%resom_bgc_index%lid_c14_co2_paere)
         endif
 
         tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_ch4) ) = &
-          ystatesf(this%resombgc_index%lid_ch4_paere)  - &
-          ystates0(this%resombgc_index%lid_ch4_paere)
+          ystatesf(this%resom_bgc_index%lid_ch4_paere)  - &
+          ystates0(this%resom_bgc_index%lid_ch4_paere)
 
         tracer_flx_parchm_vr(c,j,volatileid(betrtracer_vars%id_trc_n2o) ) = &
-          ystatesf(this%resombgc_index%lid_n2o_paere)  - &
-          ystates0(this%resombgc_index%lid_n2o_paere)
+          ystatesf(this%resom_bgc_index%lid_n2o_paere)  - &
+          ystates0(this%resom_bgc_index%lid_n2o_paere)
       endif
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_n2) = &
-        ystatesf(this%resombgc_index%lid_n2) - &
-        ystates0(this%resombgc_index%lid_n2)
+        ystatesf(this%resom_bgc_index%lid_n2) - &
+        ystates0(this%resom_bgc_index%lid_n2)
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_co2x ) = &
-        ystatesf(this%resombgc_index%lid_co2) - &
-        ystates0(this%resombgc_index%lid_co2)
+        ystatesf(this%resom_bgc_index%lid_co2) - &
+        ystates0(this%resom_bgc_index%lid_co2)
 
       if(this%use_c13)then
         tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_c13_co2x ) = &
-          ystatesf(this%resombgc_index%lid_c13_co2) - &
-          ystates0(this%resombgc_index%lid_c13_co2)
+          ystatesf(this%resom_bgc_index%lid_c13_co2) - &
+          ystates0(this%resom_bgc_index%lid_c13_co2)
       endif
 
       if(this%use_c14)then
         tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_c14_co2x ) = &
-          ystatesf(this%resombgc_index%lid_c14_co2) - &
-          ystates0(this%resombgc_index%lid_c14_co2)
+          ystatesf(this%resom_bgc_index%lid_c14_co2) - &
+          ystates0(this%resom_bgc_index%lid_c14_co2)
       endif
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_n2o  ) = &
-        ystatesf(this%resombgc_index%lid_n2o) - &
-        ystates0(this%resombgc_index%lid_n2o)
+        ystatesf(this%resom_bgc_index%lid_n2o) - &
+        ystates0(this%resom_bgc_index%lid_n2o)
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_o2   ) = &
-        ystatesf(this%resombgc_index%lid_o2) - &
-        ystates0(this%resombgc_index%lid_o2)
+        ystatesf(this%resom_bgc_index%lid_o2) - &
+        ystates0(this%resom_bgc_index%lid_o2)
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_ch4  ) = &
-        ystatesf(this%resombgc_index%lid_ch4) - &
-        ystates0(this%resombgc_index%lid_ch4)
+        ystatesf(this%resom_bgc_index%lid_ch4) - &
+        ystates0(this%resom_bgc_index%lid_ch4)
 
       tracer_flx_netpro_vr(c,j,betrtracer_vars%id_trc_ar) = &
-        ystatesf(this%resombgc_index%lid_ar) - &
-        ystates0(this%resombgc_index%lid_ar)
+        ystatesf(this%resom_bgc_index%lid_ar) - &
+        ystates0(this%resom_bgc_index%lid_ar)
 
 
       !get net production for om pools
@@ -2502,53 +2507,53 @@ if(exit_spinup)then
 
       !biogeo_flux
       biogeo_flux%c12flux_vars%hr_vr_col(c,j) = &
-        (ystatesf(this%resombgc_index%lid_co2_hr) - &
-        ystates0(this%resombgc_index%lid_co2_hr))*catomw/dtime
+        (ystatesf(this%resom_bgc_index%lid_co2_hr) - &
+        ystates0(this%resom_bgc_index%lid_co2_hr))*catomw/dtime
       
       biogeo_flux%p31flux_vars%secondp_to_occlp_vr_col(c,j) = &
-         (ystatesf(this%resombgc_index%lid_minp_occlude) - &
-          ystates0(this%resombgc_index%lid_minp_occlude))*patomw/dtime
+         (ystatesf(this%resom_bgc_index%lid_minp_occlude) - &
+          ystates0(this%resom_bgc_index%lid_minp_occlude))*patomw/dtime
 
       biogeo_flux%n14flux_vars%f_denit_vr_col(c,j)= &
-        (ystatesf(this%resombgc_index%lid_no3_den) - &
-         ystates0(this%resombgc_index%lid_no3_den))*natomw/dtime
+        (ystatesf(this%resom_bgc_index%lid_no3_den) - &
+         ystates0(this%resom_bgc_index%lid_no3_den))*natomw/dtime
 
       biogeo_flux%n14flux_vars%f_nit_vr_col(c,j) = &
-        (ystatesf(this%resombgc_index%lid_nh4_nit) - &
-         ystates0(this%resombgc_index%lid_nh4_nit))*natomw/dtime
+        (ystatesf(this%resom_bgc_index%lid_nh4_nit) - &
+         ystates0(this%resom_bgc_index%lid_nh4_nit))*natomw/dtime
 
       biogeo_flux%n14flux_vars%f_n2o_nit_vr_col(c,j) = &
-        (ystatesf(this%resombgc_index%lid_n2o_nit) - &
-         ystates0(this%resombgc_index%lid_n2o_nit))*natomw/dtime
+        (ystatesf(this%resom_bgc_index%lid_n2o_nit) - &
+         ystates0(this%resom_bgc_index%lid_n2o_nit))*natomw/dtime
 
   select type(plant_soilbgc)
-  type is(plant_soilbgc_resom_type)
+  type is(resom_plant_soilbgc_type)
     do p = 1, this%nactpft
       plant_soilbgc%plant_minn_no3_active_yield_flx_vr_patch(p,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minn_no3_pft(p)) - &
-          ystates0(this%resombgc_index%lid_plant_minn_no3_pft(p)))*natomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minn_no3_pft(p)) - &
+          ystates0(this%resom_bgc_index%lid_plant_minn_no3_pft(p)))*natomw/dtime
 
       plant_soilbgc%plant_minn_nh4_active_yield_flx_vr_patch(p,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minn_nh4_pft(p)) - &
-          ystates0(this%resombgc_index%lid_plant_minn_nh4_pft(p)))*natomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minn_nh4_pft(p)) - &
+          ystates0(this%resom_bgc_index%lid_plant_minn_nh4_pft(p)))*natomw/dtime
 
       plant_soilbgc%plant_minp_active_yield_flx_vr_patch(p,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minp_pft(p)) - &
-           ystates0(this%resombgc_index%lid_plant_minp_pft(p)))*patomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minp_pft(p)) - &
+           ystates0(this%resom_bgc_index%lid_plant_minp_pft(p)))*patomw/dtime
 
     enddo
 
     plant_soilbgc%plant_minn_no3_active_yield_flx_vr_col(c,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minn_no3) - &
-          ystates0(this%resombgc_index%lid_plant_minn_no3))*natomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minn_no3) - &
+          ystates0(this%resom_bgc_index%lid_plant_minn_no3))*natomw/dtime
 
     plant_soilbgc%plant_minn_nh4_active_yield_flx_vr_col(c,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minn_nh4) - &
-          ystates0(this%resombgc_index%lid_plant_minn_nh4))*natomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minn_nh4) - &
+          ystates0(this%resom_bgc_index%lid_plant_minn_nh4))*natomw/dtime
 
     plant_soilbgc%plant_minp_active_yield_flx_vr_col(c,j) = &
-          (ystatesf(this%resombgc_index%lid_plant_minp) - &
-           ystates0(this%resombgc_index%lid_plant_minp))*patomw/dtime
+          (ystatesf(this%resom_bgc_index%lid_plant_minp) - &
+           ystates0(this%resom_bgc_index%lid_plant_minp))*patomw/dtime
 
   end select
   end associate
@@ -2564,7 +2569,7 @@ if(exit_spinup)then
    use BeTR_biogeoFluxType      , only : betr_biogeo_flux_type
    use tracer_varcon            , only : natomw, patomw
    implicit none
-   class(bgc_reaction_resom_type) , intent(inout)    :: this
+   class(resom_bgc_reaction_type) , intent(inout)    :: this
    type(betr_bounds_type)           , intent(in)    :: bounds                      ! bounds
    integer                          , intent(in)    :: num_soilc                   ! number of columns in column filter
    integer                          , intent(in)    :: filter_soilc(:)             ! column filter
@@ -2586,7 +2591,7 @@ if(exit_spinup)then
 
    ! !ARGUMENTS:
    implicit none
-   class(bgc_reaction_resom_type) , intent(inout)    :: this !
+   class(resom_bgc_reaction_type) , intent(inout)    :: this !
    type(betr_bounds_type)               , intent(in) :: bounds                      ! bounds
    integer                              , intent(in) :: num_soilc                   ! number of columns in column filter
    integer                              , intent(in) :: filter_soilc(:)             ! column filter
@@ -2605,10 +2610,10 @@ if(exit_spinup)then
    return
    write(*,*)trim(header)//': debug info c n p mass'
 
-   c_loc=this%resombgc_index%c_loc
-   n_loc=this%resombgc_index%n_loc
-   p_loc=this%resombgc_index%p_loc
-   nelm =this%resombgc_index%nelms
+   c_loc=this%resom_bgc_index%c_loc
+   n_loc=this%resom_bgc_index%n_loc
+   p_loc=this%resom_bgc_index%p_loc
+   nelm =this%resom_bgc_index%nelms
    c_mass = 0._r8; n_mass = 0._r8; p_mass = 0._r8; min_nh4=0._r8; min_no3=0._r8;minp=0._r8;p_massocl=0._r8
    do j = 1, bounds%ubj
      do fc = 1, num_soilc
@@ -2728,7 +2733,7 @@ if(exit_spinup)then
    use BeTR_decompMod           , only : betr_bounds_type
    use betr_constants           , only : stdout
    implicit none
-   class(bgc_reaction_resom_type) , intent(inout)    :: this
+   class(resom_bgc_reaction_type) , intent(inout)    :: this
    type(betr_bounds_type)               , intent(in)  :: bounds
    integer                              , intent(in) :: lbj, ubj
    integer                              , intent(in) :: jtops(bounds%begc: )
@@ -2749,12 +2754,12 @@ if(exit_spinup)then
  
     if(betr_status%check_status())return
 
-    c_loc=this%resombgc_index%c_loc
-    n_loc=this%resombgc_index%n_loc
-    p_loc=this%resombgc_index%p_loc
-    c13_loc=this%resombgc_index%c13_loc
-    c14_loc=this%resombgc_index%c14_loc
-    nelm =this%resombgc_index%nelms
+    c_loc=this%resom_bgc_index%c_loc
+    n_loc=this%resom_bgc_index%n_loc
+    p_loc=this%resom_bgc_index%p_loc
+    c13_loc=this%resom_bgc_index%c13_loc
+    c14_loc=this%resom_bgc_index%c14_loc
+    nelm =this%resom_bgc_index%nelms
 
    do j = lbj, ubj
      do fc = 1, num_soilc
@@ -2927,8 +2932,6 @@ if(exit_spinup)then
 
    end subroutine retrieve_biostates
 
-   
-   !adding from jinyun_rr, deferred from /src/betr/betr_core/PlantSoilBGCMod.F90     -zlyu
    subroutine reset_biostates(this, bounds, lbj, ubj, jtops, num_soilc, filter_soilc, &
        betrtracer_vars, biophysforc,  tracerstate_vars, betr_status)
 
@@ -2944,7 +2947,7 @@ if(exit_spinup)then
 
        ! !ARGUMENTS:
      implicit none
-      class(bgc_reaction_resom_type) , intent(inout)    :: this
+      class(resom_bgc_reaction_type) , intent(inout)    :: this
        type(betr_bounds_type)           , intent(in)    :: bounds                      ! bounds
        integer                          , intent(in)    :: lbj, ubj                    ! lower and upper bounds, make sure they are > 0
        integer                          , intent(in)    :: num_soilc                   ! number of columns in column filter
@@ -2959,12 +2962,12 @@ if(exit_spinup)then
        integer :: c_loc, n_loc, p_loc, nelm
 
    associate(                                &
-    c13_loc=>  this%resombgc_index%c13_loc, &
-    c14_loc=>  this%resombgc_index%c14_loc, &
-    c_loc=>  this%resombgc_index%c_loc    , &
-    n_loc=>  this%resombgc_index%n_loc    , &
-    p_loc=>  this%resombgc_index%p_loc    , &
-    nelm => this%resombgc_index%nelms , &
+    c13_loc=>  this%resom_bgc_index%c13_loc, &
+    c14_loc=>  this%resom_bgc_index%c14_loc, &
+    c_loc=>  this%resom_bgc_index%c_loc    , &
+    n_loc=>  this%resom_bgc_index%n_loc    , &
+    p_loc=>  this%resom_bgc_index%p_loc    , &
+    nelm => this%resom_bgc_index%nelms , &
     id_trc_no3x => betrtracer_vars%id_trc_no3x,  &
     id_trc_p_sol => betrtracer_vars%id_trc_p_sol, &
     id_trc_beg_litr => betrtracer_vars%id_trc_beg_litr, &
@@ -3028,5 +3031,13 @@ if(exit_spinup)then
    end associate
  end subroutine reset_biostates
 
+   !----------------------------------------------------------------------
+   subroutine SetParCols(this, parcol)
+     implicit none
+       class(resom_bgc_reaction_type) , intent(inout)    :: this
+     integer, intent(in) :: parcol
 
-end module BgcReactionsresomType
+     this%parcol = parcol
+   end subroutine SetParCols
+
+end module resomBGCReactionsType

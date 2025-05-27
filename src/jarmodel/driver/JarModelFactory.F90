@@ -28,7 +28,7 @@ contains
     use ecacnpBGCType, only : create_jarmodel_ecacnp
     use simicBGCType,  only : create_jarmodel_simicbgc
     use cdomBGCType, only : create_jarmodel_cdom
-    use BgcresomType, only : create_jarmodel_resomeca    !Jing Tao - old conventional name
+    use resomBGCType, only : create_jarmodel_resomeca    !Jing Tao - old conventional name
     use v1ecaBGCType, only : create_jarmodel_v1eca
     !end_appadd
     use BeTRJarModel      , only : jar_model_type
