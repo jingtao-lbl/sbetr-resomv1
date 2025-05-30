@@ -58,14 +58,14 @@ contains
     use betr_constants  , only : betr_errmsg_len
     use BetrStatusType  , only : betr_status_type
     !begin_appadd
-!#if (defined SBETR)
     use ecacnpBGCReactionsType, only : ecacnp_bgc_reaction_type
+    use resomBGCReactionsType , only : resom_bgc_reaction_type  !Jing Tao - updated names
+#if (defined SBETR)
     use ch4soilBGCReactionsType, only : ch4soil_bgc_reaction_type
     use cdomBGCReactionsType  , only : cdom_bgc_reaction_type
     use simicBGCReactionsType , only : simic_bgc_reaction_type
     use kecaBGCReactionsType  , only : keca_bgc_reaction_type
-    use resomBGCReactionsType , only : resom_bgc_reaction_type  !Jing Tao - still used old conventional name, but keep it right now.
-!#endif
+#endif
     use v1ecaBGCReactionsType, only : v1eca_bgc_reaction_type
     !end_appadd
 
@@ -82,10 +82,12 @@ contains
     asoibgc = .false.
     select case(trim(method))
     !begin_appadd
-!#if (defined SBETR)
     case ("ecacnp","ecacnp_mosart")
        asoibgc=.true.;allocate(bgc_reaction, source=ecacnp_bgc_reaction_type())
        bgc_type='type2_bgc'
+    case ("resom")
+       asoibgc=.true.;allocate(bgc_reaction, source=resom_bgc_reaction_type())    !Jing Tao - updated names      
+#if (defined SBETR)
     case ("ch4soil")
        asoibgc=.true.;allocate(bgc_reaction, source=ch4soil_bgc_reaction_type())
     case ("cdom","cdom_mosart")
@@ -94,9 +96,7 @@ contains
        asoibgc=.true.;allocate(bgc_reaction, source=simic_bgc_reaction_type())
     case ("keca")
        asoibgc=.true.;allocate(bgc_reaction, source=keca_bgc_reaction_type())
-    case ("resom")
-       asoibgc=.true.;allocate(bgc_reaction, source=resom_bgc_reaction_type())    !Jing Tao - still used old conventional name
-!#endif
+#endif
     case ("v1eca")
        asoibgc=.true.;allocate(bgc_reaction, source=v1eca_bgc_reaction_type())
        inloop_reaction=.false.; bgc_type='type1_bgc'
@@ -108,9 +108,9 @@ contains
     end select
 
     !Jing Tao - Checking
-    print *, "In ./sbetr/src/Applications/app_util/ApplicationsFactory.F90"
-    print *, "reaction method = ", trim(method)
-    print *, "bgc_reaction allocated? ", allocated(bgc_reaction)
+    !print *, "In ./sbetr/src/Applications/app_util/ApplicationsFactory.F90"
+    !print *, "reaction method = ", trim(method)
+    !print *, "bgc_reaction allocated? ", allocated(bgc_reaction)
     
   end subroutine create_bgc_reaction_type
   !-------------------------------------------------------------------------------
@@ -126,14 +126,14 @@ contains
   use betr_constants  , only : betr_errmsg_len
   use BetrStatusType  , only : betr_status_type
   !begin_appadd
-!#if (defined SBETR)
   use ecacnpPlantSoilBGCType, only : ecacnp_plant_soilbgc_type
+  use resomPlantSoilBGCType , only : resom_plant_soilbgc_type  !Jing Tao - updated names
+#if (defined SBETR)
   use ch4soilPlantSoilBGCType, only : ch4soil_plant_soilbgc_type
   use cdomPlantSoilBGCType  , only : cdom_plant_soilbgc_type
   use simicPlantSoilBGCType , only : simic_plant_soilbgc_type
   use kecaPlantSoilBGCType  , only : keca_plant_soilbgc_type
-  use PlantSoilresomBGCType , only : resom_plant_soilbgc_type  !Jing Tao - still used old conventional name, but keep it right now.
-!#endif
+#endif
   use v1ecaPlantSoilBGCType, only : v1eca_plant_soilbgc_type
   !end_appadd
   implicit none
@@ -149,9 +149,11 @@ contains
 
   select case(trim(method))
   !begin_appadd
-!#if (defined SBETR)
   case ("ecacnp","ecacnp_mosart")
      allocate(plant_soilbgc, source=ecacnp_plant_soilbgc_type())
+  case ("resom")
+     allocate(plant_soilbgc, source=resom_plant_soilbgc_type())   !Jing Tao - updated names
+#if (defined SBETR)
   case ("ch4soil")
      allocate(plant_soilbgc, source=ch4soil_plant_soilbgc_type())
   case ("cdom","cdom_mosart")
@@ -160,9 +162,7 @@ contains
      allocate(plant_soilbgc, source=simic_plant_soilbgc_type())
   case ("keca")
      allocate(plant_soilbgc, source=keca_plant_soilbgc_type())
-  case ("resom")
-     allocate(plant_soilbgc, source=resom_plant_soilbgc_type())   !Jing Tao - still used old conventional name
-!#endif
+#endif
   case ("v1eca","v1eca_mosart")
      allocate(plant_soilbgc, source=v1eca_plant_soilbgc_type())
   !end_appadd
@@ -180,14 +180,14 @@ contains
   ! DESCRIPTION
   ! read in the parameters for specified bgc implementation
   !begin_appadd
-!#if (defined SBETR)
   use ecacnpParaType   , only : ecacnp_para
+  use resomParaType    , only : resom_para 
+#if (defined SBETR)
   use ch4soilParaType   , only : ch4soil_para
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
-  use resomParaType    , only : resom_para 
-!#endif
+#endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd
   use tracer_varcon    , only : reaction_method
@@ -199,9 +199,11 @@ contains
 
    select case (trim(reaction_method))
   !begin_appadd
-!#if (defined SBETR)
    case ("ecacnp","ecacnp_mosart")
      call ecacnp_para%readPars(ncid, bstatus)
+   case ("resom")
+     call resom_para%readPars(ncid, bstatus)
+#if (defined SBETR)
    case ("ch4soil")
      call ch4soil_para%readPars(ncid, bstatus)
    case ("cdom","cdom_mosart")
@@ -210,9 +212,7 @@ contains
      call simic_para%readPars(ncid, bstatus)
    case ("keca")
      call keca_para%readPars(ncid, bstatus)
-   case ("resom")
-     call resom_para%readPars(ncid, bstatus)
-!#endif
+#endif
    case ("v1eca","v1eca_mosart")
      call v1eca_para%readPars(ncid, bstatus)
    !end_appadd
@@ -228,14 +228,14 @@ contains
   ! DESCRIPTION
   ! read in the parameters for specified bgc implementation
   !begin_appadd
-!#if (defined SBETR)
   use ecacnpParaType   , only : ecacnp_para
+  use resomParaType    , only : resom_para
+#if (defined SBETR)
   use ch4soilParaType   , only : ch4soil_para
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
-  use resomParaType    , only : resom_para
-!#endif
+#endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd
   use betr_constants   , only : betr_namelist_buffer_size_ext
@@ -250,10 +250,12 @@ contains
 
    select case (trim(reaction_method))
    !begin_appadd
-!#if (defined SBETR)
    case ("ecacnp","ecacnp_mosart")
      nparcols=0
      call ecacnp_para%Init(bstatus)
+   case ("resom")
+     call resom_para%Init(bstatus)    
+#if (defined SBETR)
    case ("ch4soil")
      call ch4soil_para%Init(bstatus)
    case ("cdom","cdom_mosart")
@@ -262,9 +264,7 @@ contains
      call simic_para%Init(bstatus)
    case ("keca")
      call keca_para%Init(bstatus)
-   case ("resom")
-     call resom_para%Init(bstatus)    
-!#endif
+#endif
    case ("v1eca")
      call v1eca_para%Init(bstatus)
    !end_appadd
@@ -278,13 +278,13 @@ contains
 
   ! set spinup strategies
   !begin_appadd
-!#if (defined SBETR)
   use ecacnpParaType  , only : ecacnp_para
+  use resomParaType   , only : resom_para
+#if (defined SBETR)
   use ch4soilParaType  , only : ch4soil_para
   use cdomParaType    , only : cdom_para
   use kecaParaType    , only : keca_para
-  use resomParaType   , only : resom_para
-!#endif
+#endif
   use v1ecaParaType  , only : v1eca_para
   !end_appadd
   use tracer_varcon   , only : reaction_method
@@ -292,18 +292,18 @@ contains
 
   select case (trim(reaction_method))
   !begin_appadd
-!#if (defined SBETR)
   case ("ecacnp","ecacnp_mosart")
      call  ecacnp_para%set_spinup_factor()
+  case ("resom")
+     call resom_para%set_spinup_factor()   
+#if (defined SBETR)
   case ("ch4soil")
      call  ch4soil_para%set_spinup_factor()
   case ("cdom","cdom_mosart")
      call cdom_para%set_spinup_factor()
   case ("keca")
      call keca_para%set_spinup_factor()
-  case ("resom")
-     call resom_para%set_spinup_factor()   
-!#endif
+#endif
   case ("v1eca","v1eca_mosart")
      call  v1eca_para%set_spinup_factor()
   !end_appadd
@@ -319,14 +319,14 @@ contains
   ! read in the parameters for specified bgc implementation
   !begin_appadd
   use tracer_varcon    , only : reaction_method, nparcols
-!#if (defined SBETR)
   use ecacnpParaType   , only : ecacnp_para,ecacnp_paras
+  use resomParaType    , only : resom_para
+#if (defined SBETR)
   use ch4soilParaType   , only : ch4soil_para
   use cdomParaType     , only : cdom_para
   use simicParaType    , only : simic_para
   use kecaParaType     , only : keca_para
-  use resomParaType    , only : resom_para
-!#endif
+#endif
   use v1ecaParaType   , only : v1eca_para
   !end_appadd
   use betr_constants   , only : betr_namelist_buffer_size_ext
@@ -348,6 +348,7 @@ contains
       if(bstatus%check_status())return
       call ecacnp_paras(fl)%deep_copy(ecacnp_para)
     enddo
+
 !   case ("ch4soil")
 !     call ch4soil_para%Init(bstatus)
 !   case ("cdom","cdom_mosart")

@@ -261,7 +261,7 @@ module resomPlantSoilBGCType
   !set flux profiles, e.g. root respiration
   call this%set_profiles_vars(bounds, numf, filter, betr_pft, biogeo_forc, biogeo_fluxes)
 
-  !set root exudation, which will be added in the future.
+  !set root exudation, which will be added in the future ---Jing 
 
   end subroutine lsm_betr_plant_soilbgc_send
 

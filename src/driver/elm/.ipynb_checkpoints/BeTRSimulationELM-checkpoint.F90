@@ -12,7 +12,6 @@ module BeTRSimulationELM
   use shr_kind_mod        , only : r8 => shr_kind_r8
   use BeTRSimulation      , only : betr_simulation_type
   use decompMod           , only : bounds_type
-  use BeTRSimulation      , only : betr_simulation_type
   use BeTR_TimeMod        , only : betr_time_type
   use tracer_varcon       , only : betr_nlevsoi, betr_nlevsno, betr_nlevtrc_soil
   use betr_decompMod      , only : betr_bounds_type
