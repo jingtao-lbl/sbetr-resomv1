@@ -603,10 +603,10 @@ implicit none
     !call list_disp(list_name);call list_disp(list_pool);call list_disp(list_unit)
     !call list_disp(list_react)
 
-    print *, 'Jing Tao - Checking ompoolnames:'
-    do jj = 1, this%nom_pools
-        print *, jj, trim(this%ompoolnames(jj))
-    end do
+    !print *, 'Jing Tao - Checking ompoolnames:'
+    !do jj = 1, this%nom_pools
+    !    print *, jj, trim(this%ompoolnames(jj))
+    !end do
   
     call list_free(list_name)
     call list_free(list_pool)
