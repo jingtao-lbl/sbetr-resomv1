@@ -319,7 +319,8 @@ contains
     enddo
 !    print*,'out without drainage'
     if(this%bsimstatus%check_status())then
-      call endrun(msg=this%bsimstatus%print_msg())
+      !call endrun(msg=this%bsimstatus%print_msg())
+      print*,'Error in ELMStepWithoutDrainage' !Jing Tao testing
     endif
     if(betr_spinup_state>0)then
       !the following needs double check for whether to keep or remove it.

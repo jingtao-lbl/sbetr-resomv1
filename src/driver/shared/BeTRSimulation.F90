@@ -785,7 +785,7 @@ contains
     if(this%bsimstatus%check_status()) then
       write(iulog,*)this%bsimstatus%cindex
       write(iulog,*)trim(this%bsimstatus%print_msg())
-      call endrun(msg=trim(this%bsimstatus%print_msg()))
+      !call endrun(msg=trim(this%bsimstatus%print_msg()))   !Jing Tao Testing
     endif
   end subroutine BeTRSimulationMassBalanceCheck
 

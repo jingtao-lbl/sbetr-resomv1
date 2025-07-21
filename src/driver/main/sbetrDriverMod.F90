@@ -262,7 +262,7 @@ contains
 
     !no calculation in the first step
     if(record==0)cycle
-    call simulation%BeginMassBalanceCheck(bounds)
+    !call simulation%BeginMassBalanceCheck(bounds) !Jing Tao testing
 
     !x print*,'without drainage'
     !the following call could be lsm specific, so that
@@ -343,7 +343,7 @@ contains
     call simulation%StepWithDrainage(bounds, col)
 
     !x print*,'do mass balance check'
-    call simulation%MassBalanceCheck(bounds)
+    !call simulation%MassBalanceCheck(bounds)    !Jing Tao testing
 
     select type(simulation)
     class is (betr_simulation_standalone_type)

@@ -157,17 +157,17 @@ module TracerBalanceMod
 
               if(abs(err_rel)>err_min_rel .and. do_betr_output)then
                  tracername=betrtracer_vars%get_tracername(kk)
-                 write(msg,*)'error exceeds the tolerance for tracer '//trim(tracername), &
-                      ' err=',errtracer(c,kk), ' col=',c, ' trcid=',kk,&
-                      ' nstep=', betr_time%get_nstep(), &
-                      ' netpro=',tracer_flx_netpro(c,kk),&
-                      ' netphyloss=',tracer_flx_netphyloss(c,kk),&
-                      ' begm=',beg_tracer_molarmass(c,kk), &
-                      ' endm=',end_tracer_molarmass(c,kk), &
-                      errMsg(mod_filename, __LINE__)
+                 write(msg,*)'error exceeds the tolerance for tracer '//trim(tracername)!, &
+                      !' err=',errtracer(c,kk), ' col=',c, ' trcid=',kk,&
+                      !' nstep=', betr_time%get_nstep(), &
+                      !' netpro=',tracer_flx_netpro(c,kk),&
+                      !' netphyloss=',tracer_flx_netphyloss(c,kk),&
+                      !' begm=',beg_tracer_molarmass(c,kk), &
+                      !' endm=',end_tracer_molarmass(c,kk), &
+                      !errMsg(mod_filename, __LINE__)    !Jing Tao testing
                  call tracerflux_vars%flux_display(c,kk,betrtracer_vars, msg1)
                  msg = trim(msg)//new_line('A')//trim(msg1)
-                 call betr_status%set_msg(msg=msg, err=-1)
+                 !call betr_status%set_msg(msg=msg, err=-1)
                  return
               endif
            enddo

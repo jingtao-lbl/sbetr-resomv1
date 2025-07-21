@@ -35,3 +35,4 @@ env3/
 
 # os x junk
 .DS_Store
+.ipynb_checkpoints/

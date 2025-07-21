@@ -361,7 +361,7 @@ contains
 
   this%init_cp_met  = mother%init_cp_met
   this%init_cp_cel  = mother%init_cp_cel
-  this%init_cp_lig  = mother%init_cp_cel
+  this%init_cp_lig  = mother%init_cp_lig !TJ: fixed typo
   this%init_cp_cwd  = mother%init_cp_cwd
   this%init_cp_lwd  = mother%init_cp_lwd
   this%init_cp_fwd  = mother%init_cp_fwd

@@ -293,7 +293,11 @@ contains
   ! use daxpy - compute y := alpha * x + y
   ! SUBROUTINE DAXPY(N, ALPHA, X, INCX, Y, INCY)
 
-  call taxpy(this%nvars, 1._r8, yval, 1, this%yvals, 1)
+  !Jing Tao: now yval is two dimentional
+  !call taxpy(this%nvars, 1._r8, yval, 1, this%yvals, 1)
+  do jj = 1, this%ncols
+    call taxpy(this%nvars, 1._r8, yval(jj,:), 1, this%yvals(jj,:), 1)
+  enddo  
 
   call this%proc_counter()
 
